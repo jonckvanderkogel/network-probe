@@ -35,7 +35,7 @@ public class PingService {
                         .join()
                         .orElseGet(() -> pingFuture2
                                 .join()
-                                .orElse(new PingResponse(false, 400))
+                                .orElseGet(() ->new PingResponse(false, 400))
                         )
                 );
     }
