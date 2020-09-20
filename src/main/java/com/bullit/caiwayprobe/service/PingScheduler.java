@@ -17,6 +17,7 @@ public class PingScheduler {
     @Scheduled(fixedRate = 1000)
     public void performPings() {
         pingService
-                .pingDnsServers().thenAccept(r -> log.info(r.toString()));
+                .pingDnsServers()
+                .thenAccept(r -> log.info(String.format("reachable: %s; duration: %s ms", r.isReachable(), r.getResponseTime())));
     }
 }
