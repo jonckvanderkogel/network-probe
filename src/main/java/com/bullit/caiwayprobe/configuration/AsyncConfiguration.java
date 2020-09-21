@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadFactory;
 @Configuration
 public class AsyncConfiguration {
     @Bean(name="pingExecutor")
-    public Executor getAwsExecutor() {
+    public Executor getPingExecutor() {
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
                 .setNameFormat("pingExecutor-%d")
                 .setDaemon(false)
