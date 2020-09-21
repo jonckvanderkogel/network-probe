@@ -10,4 +10,5 @@ import lombok.RequiredArgsConstructor;
 public class PingResponse {
     private final boolean reachable;
     private final long responseTime;
+    private final String dnsServerAddress;
 }

@@ -18,6 +18,12 @@ public class PingScheduler {
     public void performPings() {
         pingService
                 .pingDnsServers()
-                .thenAccept(r -> log.info(String.format("reachable: %s; duration: %s ms", r.isReachable(), r.getResponseTime())));
+                .thenAccept(r -> log.info(
+                        String.format("reachable: %s; duration: %s ms; server: %s",
+                                r.isReachable(),
+                                r.getResponseTime(),
+                                r.getDnsServerAddress()
+                        )
+                ));
     }
 }

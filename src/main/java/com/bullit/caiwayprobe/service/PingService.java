@@ -41,7 +41,7 @@ public class PingService {
                         .join()
                         .orElseGet(() -> pingFuture2
                                 .join()
-                                .orElseGet(() ->new PingResponse(false, 666))
+                                .orElseGet(() ->new PingResponse(false, 666, "none"))
                         )
                 );
     }
@@ -53,7 +53,7 @@ public class PingService {
             boolean isReachable = address.isReachable(900);
             long timeToRespond = new Date().getTime() - now.getTime();
 
-            return isReachable ? Optional.of(new PingResponse(isReachable, timeToRespond)) : Optional.empty();
+            return isReachable ? Optional.of(new PingResponse(true, timeToRespond, ipAddress)) : Optional.empty();
         } catch (IOException e) {
             log.error(e.getMessage());
             Stream.of(e.getStackTrace()).forEach(l -> log.error(l.toString()));
