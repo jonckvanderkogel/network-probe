@@ -21,6 +21,9 @@ public class PingScheduler {
                 .pingDnsServers()
                 .thenAccept(r -> {
                     MDC.put("caiway-pinger", "pings");
+                    MDC.put("reachable", String.valueOf(r.isReachable()));
+                    MDC.put("responseTime", String.valueOf(r.getResponseTime()));
+                    MDC.put("dnsServer", r.getDnsServerAddress());
                     log.info(
                         String.format("reachable: %s; duration: %s ms; server: %s",
                                 r.isReachable(),
