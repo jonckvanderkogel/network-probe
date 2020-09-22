@@ -1,6 +1,7 @@
 package com.bullit.caiwayprobe.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,12 +19,15 @@ public class PingScheduler {
     public void performPings() {
         pingService
                 .pingDnsServers()
-                .thenAccept(r -> log.info(
+                .thenAccept(r -> {
+                    MDC.put("caiway-pinger", "pings");
+                    log.info(
                         String.format("reachable: %s; duration: %s ms; server: %s",
                                 r.isReachable(),
                                 r.getResponseTime(),
                                 r.getDnsServerAddress()
                         )
-                ));
+                    );
+                });
     }
 }
