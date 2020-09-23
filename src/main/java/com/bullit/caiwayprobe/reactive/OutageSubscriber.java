@@ -1,6 +1,7 @@
 package com.bullit.caiwayprobe.reactive;
 
-import com.bullit.caiwayprobe.service.PingResponse;
+import com.bullit.caiwayprobe.domain.PingResponse;
+import com.bullit.caiwayprobe.support.MDCLogger;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -9,46 +10,35 @@ import org.slf4j.MDC;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
-import java.util.concurrent.Flow;
-import java.util.stream.Stream;
 
 @Slf4j
-public class OutageSubscriber implements Flow.Subscriber<PingResponse> {
-    private Flow.Subscription subscription;
+public class OutageSubscriber extends BaseSubscriber<PingResponse> {
     private final OutageMarker outageMarker = new OutageMarker();
     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
 
-    @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        this.subscription = subscription;
-        subscription.request(1);
+    public OutageSubscriber(MDCLogger mdcLogger) {
+        super(mdcLogger,"OutageSubscriber");
     }
 
     @Override
     public void onNext(PingResponse item) {
         outageMarker.handleMessage(item).ifPresent(outage -> {
-            MDC.put("caiway-pinger", "outages");
-            MDC.put("from", df.format(outage.getFrom()));
-            MDC.put("to", df.format(outage.getTo()));
-            log.info("Outage");
+            mdcLogger.logWithMDCClearing(() -> {
+                MDC.put("caiway-pinger", "outages");
+                MDC.put("from", df.format(outage.getFrom()));
+                MDC.put("to", df.format(outage.getTo()));
+                log.info("Outage");
+            });
         });
 
         subscription.request(1);
     }
 
     @Override
-    public void onError(Throwable throwable) {
-        MDC.put("caiway-pinger", "errors");
-        log.error(throwable.getMessage());
-        Stream.of(throwable.getStackTrace()).forEach(l -> log.error(l.toString()));
-    }
-
-    @Override
     public void onComplete() {
         // Send one last message manually to ensure an ongoing outage will be logged on exit
         onNext(new PingResponse(true, 666, "shutdown signal"));
-        MDC.put("caiway-pinger", "system");
-        log.info("OutageSubscriber stopping");
+        super.onComplete();
     }
 
     @Getter

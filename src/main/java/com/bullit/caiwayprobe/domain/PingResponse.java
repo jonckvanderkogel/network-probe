@@ -1,4 +1,4 @@
-package com.bullit.caiwayprobe.service;
+package com.bullit.caiwayprobe.domain;
 
 import lombok.Data;
 import lombok.Getter;

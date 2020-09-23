@@ -3,7 +3,7 @@
     <!-- https://www.baeldung.com/spring-boot-logging -->
     <property name="LOGS" value="./logs" />
 
-    <appender name="roleSiftingAppender" class="ch.qos.logback.classic.sift.SiftingAppender">
+    <appender name="siftingAppender" class="ch.qos.logback.classic.sift.SiftingAppender">
         <discriminator>
             <key>caiway-pinger</key>
             <defaultValue>system</defaultValue>
@@ -39,9 +39,8 @@
         </layout>
     </appender>
 
-    <!-- LOG everything at INFO level -->
     <root level="info">
         <appender-ref ref="console" />
-        <appender-ref ref="roleSiftingAppender" />
+        <appender-ref ref="siftingAppender" />
     </root>
 </configuration>

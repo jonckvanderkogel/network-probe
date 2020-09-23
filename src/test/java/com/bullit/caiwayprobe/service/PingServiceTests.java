@@ -1,5 +1,6 @@
 package com.bullit.caiwayprobe.service;
 
+import com.bullit.caiwayprobe.support.MDCLogger;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.jodah.concurrentunit.Waiter;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ public class PingServiceTests {
         return executorService;
     }
 
-    private BiFunction<String, String, PingService> pingServiceSupplier = (dnsServer1, dnsServer2) -> new PingService(getPingExecutor(), dnsServer1, dnsServer2);
+    private BiFunction<String, String, PingService> pingServiceSupplier = (dnsServer1, dnsServer2) -> new PingService(getPingExecutor(), dnsServer1, dnsServer2, new MDCLogger());
 
     @Test
     public void testPerformPing() throws TimeoutException, InterruptedException {

@@ -2,7 +2,9 @@ package com.bullit.caiwayprobe.configuration;
 
 import com.bullit.caiwayprobe.reactive.OutageSubscriber;
 import com.bullit.caiwayprobe.reactive.PingResponsePublisher;
-import com.bullit.caiwayprobe.service.PingResponse;
+import com.bullit.caiwayprobe.reactive.PingSubscriber;
+import com.bullit.caiwayprobe.domain.PingResponse;
+import com.bullit.caiwayprobe.support.MDCLogger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,6 +21,16 @@ public class ReactiveStreamsConfiguration {
 
     @Bean(name="outageSubscriber")
     public Flow.Subscriber<PingResponse> getOutageSubscriber() {
-        return new OutageSubscriber();
+        return new OutageSubscriber(getMdcLogger());
+    }
+
+    @Bean(name="pingSubscriber")
+    public Flow.Subscriber<PingResponse> getPingSubscriber() {
+        return new PingSubscriber(getMdcLogger());
+    }
+
+    @Bean(name="mdcLogger")
+    public MDCLogger getMdcLogger() {
+        return new MDCLogger();
     }
 }

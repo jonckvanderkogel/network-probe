@@ -1,7 +1,7 @@
 package com.bullit.caiwayprobe.service;
 
+import com.bullit.caiwayprobe.domain.PingResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,10 +18,12 @@ public class PingScheduler {
 
     public PingScheduler(@Autowired PingService pingService,
                          @Autowired @Qualifier("pingResponsePublisher") SubmissionPublisher<PingResponse> pingResponsePublisher,
-                         @Autowired @Qualifier("outageSubscriber")Flow.Subscriber<PingResponse> outageSubscriber) {
+                         @Autowired @Qualifier("outageSubscriber") Flow.Subscriber<PingResponse> outageSubscriber,
+                         @Autowired @Qualifier("pingSubscriber") Flow.Subscriber<PingResponse> pingSubscriber) {
         this.pingService = pingService;
         this.pingResponsePublisher = pingResponsePublisher;
         pingResponsePublisher.subscribe(outageSubscriber);
+        pingResponsePublisher.subscribe(pingSubscriber);
     }
 
     @Scheduled(fixedRate = 1000)
@@ -30,17 +32,6 @@ public class PingScheduler {
                 .pingDnsServers()
                 .thenAccept(r -> {
                     pingResponsePublisher.submit(r);
-                    MDC.put("caiway-pinger", "pings");
-                    MDC.put("reachable", String.valueOf(r.isReachable()));
-                    MDC.put("responseTime", String.valueOf(r.getResponseTime()));
-                    MDC.put("dnsServer", r.getDnsServerAddress());
-                    log.info(
-                        String.format("reachable: %s; duration: %s ms; server: %s",
-                                r.isReachable(),
-                                r.getResponseTime(),
-                                r.getDnsServerAddress()
-                        )
-                    );
                 });
     }
 }

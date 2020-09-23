@@ -1,5 +1,7 @@
 package com.bullit.caiwayprobe.service;
 
+import com.bullit.caiwayprobe.domain.PingResponse;
+import com.bullit.caiwayprobe.support.MDCLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +22,17 @@ public class PingService {
     private final String serverOne;
     private final String serverTwo;
     private final Executor pingExecutor;
+    private final MDCLogger mdcLogger;
 
     public PingService(@Autowired @Qualifier("pingExecutor") Executor pingExecutor,
                        @Autowired @Qualifier("dnsServerOne") String dnsServerOne,
-                       @Autowired @Qualifier("dnsServerTwo") String dnsServerTwo) {
+                       @Autowired @Qualifier("dnsServerTwo") String dnsServerTwo,
+                       @Autowired @Qualifier("mdcLogger") MDCLogger mdcLogger) {
         log.info(String.format("Starting up PingService with servers: %s and %s", dnsServerOne, dnsServerTwo));
         this.pingExecutor = pingExecutor;
         this.serverOne = dnsServerOne;
         this.serverTwo = dnsServerTwo;
+        this.mdcLogger = mdcLogger;
     }
 
     public CompletableFuture<PingResponse> pingDnsServers() {
@@ -54,9 +59,12 @@ public class PingService {
 
             return isReachable ? Optional.of(new PingResponse(true, timeToRespond, ipAddress)) : Optional.empty();
         } catch (IOException e) {
-            MDC.put("caiway-pinger", "errors");
-            log.error(e.getMessage());
-            Stream.of(e.getStackTrace()).forEach(l -> log.error(l.toString()));
+            mdcLogger.logWithMDCClearing(() -> {
+                MDC.put("caiway-pinger", "errors");
+                log.error(e.getMessage());
+                Stream.of(e.getStackTrace()).forEach(l -> log.error(l.toString()));
+            });
+
             return Optional.empty();
         }
     }
