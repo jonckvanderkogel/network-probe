@@ -1,6 +1,7 @@
 package com.bullit.caiwayprobe.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,7 @@ public class PingService {
 
             return isReachable ? Optional.of(new PingResponse(true, timeToRespond, ipAddress)) : Optional.empty();
         } catch (IOException e) {
+            MDC.put("caiway-pinger", "errors");
             log.error(e.getMessage());
             Stream.of(e.getStackTrace()).forEach(l -> log.error(l.toString()));
             return Optional.empty();
