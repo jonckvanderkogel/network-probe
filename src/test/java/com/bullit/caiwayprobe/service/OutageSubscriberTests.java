@@ -34,19 +34,44 @@ public class OutageSubscriberTests {
         return new PingResponse(reachable, 5, "foo");
     }
 
-    @Test
-    public void havingNonReachablePingResultsShouldResultInAnOutage() {
+    private ListAppender<ILoggingEvent> setupAppender() {
         Logger testLogger = (Logger) LoggerFactory.getLogger(OutageSubscriber.class);
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
         listAppender.start();
         testLogger.addAppender(listAppender);
+        return listAppender;
+    }
 
+    @Test
+    public void havingNonReachablePingResultsShouldResultInAnOutage() {
+        var listAppender = setupAppender();
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier());
         var pingResultPublisher = new SubmissionPublisher<PingResponse>();
         pingResultPublisher.subscribe(outageSubscriber);
         pingResultPublisher.submit(producePingResponse(true));
         pingResultPublisher.submit(producePingResponse(false));
         pingResultPublisher.submit(producePingResponse(true));
+        pingResultPublisher.close();
+
+        List<ILoggingEvent> logsList = listAppender.list;
+        await().atMost(1, TimeUnit.SECONDS).untilAsserted(
+                () -> {
+                    var mdcMap = logsList.get(0).getMDCPropertyMap();
+                    assertEquals("2020-09-23 20:50:44.000", mdcMap.get("from"));
+                    assertEquals("2020-09-23 20:53:22.000", mdcMap.get("to"));
+                    assertEquals("Outage", logsList.get(0).getMessage());
+                }
+        );
+    }
+
+    @Test
+    public void terminatingPublisherDuringOutageShouldStillResultInAnOutage() {
+        var listAppender = setupAppender();
+        var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier());
+        var pingResultPublisher = new SubmissionPublisher<PingResponse>();
+        pingResultPublisher.subscribe(outageSubscriber);
+        pingResultPublisher.submit(producePingResponse(true));
+        pingResultPublisher.submit(producePingResponse(false));
         pingResultPublisher.close();
 
         List<ILoggingEvent> logsList = listAppender.list;
