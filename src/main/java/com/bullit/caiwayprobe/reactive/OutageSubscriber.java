@@ -10,14 +10,18 @@ import org.slf4j.MDC;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @Slf4j
 public class OutageSubscriber extends BaseSubscriber<PingResponse> {
     private final OutageMarker outageMarker = new OutageMarker();
-    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
+    // SimpleDateFormat is not thread safe so make sure to get a new instance every time you use it
+    private Supplier<SimpleDateFormat> dfSupplier = () -> new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
+    private final Supplier<Date> dateSupplier;
 
-    public OutageSubscriber(MDCLogger mdcLogger) {
+    public OutageSubscriber(MDCLogger mdcLogger, Supplier<Date> dateSupplier) {
         super(mdcLogger,"OutageSubscriber");
+        this.dateSupplier = dateSupplier;
     }
 
     @Override
@@ -25,8 +29,8 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
         outageMarker.handleMessage(item).ifPresent(outage -> {
             mdcLogger.logWithMDCClearing(() -> {
                 MDC.put("caiway-pinger", "outages");
-                MDC.put("from", df.format(outage.getFrom()));
-                MDC.put("to", df.format(outage.getTo()));
+                MDC.put("from", dfSupplier.get().format(outage.getFrom()));
+                MDC.put("to", dfSupplier.get().format(outage.getTo()));
                 log.info("Outage");
             });
         });
@@ -54,7 +58,7 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
 
     @Setter
     @Getter
-    private static class OutageMarker {
+    private class OutageMarker {
         private boolean outageGoingOn = false;
         private Date startTime;
 
@@ -68,7 +72,7 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
         public Optional<Outage> reachable() {
             if (outageGoingOn) {
                 outageGoingOn = false;
-                return Optional.of(new Outage(startTime, new Date()));
+                return Optional.of(new Outage(startTime, dateSupplier.get()));
             } else {
                 return Optional.empty();
             }
@@ -77,7 +81,7 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
         public Optional<Outage> notReachable() {
             if (!outageGoingOn) {
                 outageGoingOn = true;
-                startTime = new Date();
+                startTime = dateSupplier.get();
             }
             return Optional.empty();
         }

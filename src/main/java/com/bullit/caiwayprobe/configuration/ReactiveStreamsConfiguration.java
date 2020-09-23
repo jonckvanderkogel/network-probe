@@ -8,6 +8,7 @@ import com.bullit.caiwayprobe.support.MDCLogger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Date;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
@@ -21,7 +22,7 @@ public class ReactiveStreamsConfiguration {
 
     @Bean(name="outageSubscriber")
     public Flow.Subscriber<PingResponse> getOutageSubscriber() {
-        return new OutageSubscriber(getMdcLogger());
+        return new OutageSubscriber(getMdcLogger(), () -> new Date());
     }
 
     @Bean(name="pingSubscriber")
