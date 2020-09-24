@@ -1,13 +1,9 @@
-package com.bullit.caiwayprobe.service;
+package com.bullit.caiwayprobe.reactive;
 
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import com.bullit.caiwayprobe.domain.PingResponse;
-import com.bullit.caiwayprobe.reactive.OutageSubscriber;
 import com.bullit.caiwayprobe.support.MDCLogger;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -17,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import static com.bullit.caiwayprobe.reactive.ReactiveTestSupport.setupAppender;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,17 +31,9 @@ public class OutageSubscriberTests {
         return new PingResponse(reachable, 5, "foo");
     }
 
-    private ListAppender<ILoggingEvent> setupAppender() {
-        Logger testLogger = (Logger) LoggerFactory.getLogger(OutageSubscriber.class);
-        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-        listAppender.start();
-        testLogger.addAppender(listAppender);
-        return listAppender;
-    }
-
     @Test
     public void havingNonReachablePingResultsShouldResultInAnOutage() {
-        var listAppender = setupAppender();
+        var listAppender = setupAppender(OutageSubscriber.class);;
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier());
         var pingResultPublisher = new SubmissionPublisher<PingResponse>();
         pingResultPublisher.subscribe(outageSubscriber);
@@ -66,7 +55,7 @@ public class OutageSubscriberTests {
 
     @Test
     public void terminatingPublisherDuringOutageShouldStillResultInAnOutage() {
-        var listAppender = setupAppender();
+        var listAppender = setupAppender(OutageSubscriber.class);
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier());
         var pingResultPublisher = new SubmissionPublisher<PingResponse>();
         pingResultPublisher.subscribe(outageSubscriber);
