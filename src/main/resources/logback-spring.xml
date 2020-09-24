@@ -5,12 +5,12 @@
 
     <appender name="siftingAppender" class="ch.qos.logback.classic.sift.SiftingAppender">
         <discriminator>
-            <key>caiway-pinger</key>
+            <key>network-probe</key>
             <defaultValue>system</defaultValue>
         </discriminator>
         <sift>
             <appender name="rollingFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
-                <file>${LOGS}/${caiway-pinger}.log</file>
+                <file>${LOGS}/${network-probe}.log</file>
                 <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
                     <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
                         <prettyPrint>false</prettyPrint>
@@ -21,7 +21,7 @@
 
                 <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                     <!-- rollover daily and when the file reaches 10 MegaBytes -->
-                    <fileNamePattern>${LOGS}/archived/${caiway-pinger}/${caiway-pinger}-%d{yyyy-MM-dd}.%i.log
+                    <fileNamePattern>${LOGS}/archived/${network-probe}/${network-probe}-%d{yyyy-MM-dd}.%i.log
                     </fileNamePattern>
                     <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                         <maxFileSize>10MB</maxFileSize>

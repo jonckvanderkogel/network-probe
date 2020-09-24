@@ -16,6 +16,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
+import static com.bullit.networkprobe.support.MDCLogger.MDC_KEY;
+import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_ERRORS;
+
 @Slf4j
 @Service
 public class PingService {
@@ -60,7 +63,7 @@ public class PingService {
             return isReachable ? Optional.of(new PingResponse(true, timeToRespond, ipAddress)) : Optional.empty();
         } catch (IOException e) {
             mdcLogger.logWithMDCClearing(() -> {
-                MDC.put("caiway-pinger", "errors");
+                MDC.put(MDC_KEY, MDC_VALUE_ERRORS);
                 log.error(e.getMessage());
                 Stream.of(e.getStackTrace()).forEach(l -> log.error(l.toString()));
             });

@@ -12,6 +12,9 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.bullit.networkprobe.support.MDCLogger.MDC_KEY;
+import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_OUTAGES;
+
 @Slf4j
 public class OutageSubscriber extends BaseSubscriber<PingResponse> {
     private final OutageMarker outageMarker = new OutageMarker();
@@ -27,7 +30,7 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
     @Override
     public void onNext(PingResponse item) {
         outageMarker.handleMessage(item).ifPresent(outage -> mdcLogger.logWithMDCClearing(() -> {
-            MDC.put("caiway-pinger", "outages");
+            MDC.put(MDC_KEY, MDC_VALUE_OUTAGES);
             MDC.put("from", dfSupplier.get().format(outage.getFrom()));
             MDC.put("to", dfSupplier.get().format(outage.getTo()));
             log.info("Outage");
