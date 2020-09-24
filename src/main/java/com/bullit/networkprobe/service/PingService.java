@@ -16,8 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
-import static com.bullit.networkprobe.support.MDCLogger.MDC_KEY;
-import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_ERRORS;
+import static com.bullit.networkprobe.support.MDCLogger.*;
 
 @Slf4j
 @Service

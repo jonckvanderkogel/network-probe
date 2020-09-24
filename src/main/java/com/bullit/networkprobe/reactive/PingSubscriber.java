@@ -5,8 +5,7 @@ import com.bullit.networkprobe.support.MDCLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
-import static com.bullit.networkprobe.support.MDCLogger.MDC_KEY;
-import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_PINGS;
+import static com.bullit.networkprobe.support.MDCLogger.*;
 
 @Slf4j
 public class PingSubscriber extends BaseSubscriber<PingResponse> {

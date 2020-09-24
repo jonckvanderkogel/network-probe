@@ -12,8 +12,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.bullit.networkprobe.support.MDCLogger.MDC_KEY;
-import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_OUTAGES;
+import static com.bullit.networkprobe.support.MDCLogger.*;
 
 @Slf4j
 public class OutageSubscriber extends BaseSubscriber<PingResponse> {
