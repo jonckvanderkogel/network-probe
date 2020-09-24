@@ -5,6 +5,7 @@ import com.bullit.caiwayprobe.domain.PingResponse;
 import com.bullit.caiwayprobe.support.MDCLogger;
 import org.junit.jupiter.api.Test;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -20,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class OutageSubscriberTests {
 
     private Supplier<Date> createFixedDateSupplier() {
-        Date date1 = new GregorianCalendar(2020, 8, 23, 20, 50, 44).getTime();
-        Date date2 = new GregorianCalendar(2020, 8, 23, 20, 53, 22).getTime();
+        Date date1 = new GregorianCalendar(2020, Calendar.SEPTEMBER, 23, 20, 50, 44).getTime();
+        Date date2 = new GregorianCalendar(2020, Calendar.SEPTEMBER, 23, 20, 53, 22).getTime();
         final List<Date> dates = List.of(date1, date2);
         final AtomicInteger atomicInteger = new AtomicInteger();
         return () -> dates.get(atomicInteger.getAndAdd(1));

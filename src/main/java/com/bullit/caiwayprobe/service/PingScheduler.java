@@ -30,8 +30,6 @@ public class PingScheduler {
     public void performPings() {
         pingService
                 .pingDnsServers()
-                .thenAccept(r -> {
-                    pingResponsePublisher.submit(r);
-                });
+                .thenAccept(r -> pingResponsePublisher.submit(r));
     }
 }

@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 public class OutageSubscriber extends BaseSubscriber<PingResponse> {
     private final OutageMarker outageMarker = new OutageMarker();
     // SimpleDateFormat is not thread safe so make sure to get a new instance every time you use it
-    private Supplier<SimpleDateFormat> dfSupplier = () -> new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
+    private final Supplier<SimpleDateFormat> dfSupplier = () -> new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
     private final Supplier<Date> dateSupplier;
 
     public OutageSubscriber(MDCLogger mdcLogger, Supplier<Date> dateSupplier) {
@@ -26,14 +26,12 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
 
     @Override
     public void onNext(PingResponse item) {
-        outageMarker.handleMessage(item).ifPresent(outage -> {
-            mdcLogger.logWithMDCClearing(() -> {
-                MDC.put("caiway-pinger", "outages");
-                MDC.put("from", dfSupplier.get().format(outage.getFrom()));
-                MDC.put("to", dfSupplier.get().format(outage.getTo()));
-                log.info("Outage");
-            });
-        });
+        outageMarker.handleMessage(item).ifPresent(outage -> mdcLogger.logWithMDCClearing(() -> {
+            MDC.put("caiway-pinger", "outages");
+            MDC.put("from", dfSupplier.get().format(outage.getFrom()));
+            MDC.put("to", dfSupplier.get().format(outage.getTo()));
+            log.info("Outage");
+        }));
 
         subscription.request(1);
     }

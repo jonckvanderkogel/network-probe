@@ -17,7 +17,7 @@ public class PingSchedulerTests {
         SubmissionPublisher<PingResponse> publisherMock = mock(SubmissionPublisher.class);
         Flow.Subscriber<PingResponse> outageSubscriberMock = mock(Flow.Subscriber.class);
         Flow.Subscriber<PingResponse> pingSubscriberMock = mock(Flow.Subscriber.class);
-        
+
         var pingResponse = new PingResponse(true, 123, "foo");
         var answer = new CompletableFuture<PingResponse>();
         answer.complete(pingResponse);

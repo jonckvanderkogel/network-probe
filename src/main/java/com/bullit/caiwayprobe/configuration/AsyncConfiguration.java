@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
@@ -17,8 +16,7 @@ public class AsyncConfiguration {
                 .setNameFormat("pingExecutor-%d")
                 .setDaemon(false)
                 .build();
-        ExecutorService executorService = Executors.newFixedThreadPool(10, threadFactory);
 
-        return executorService;
+        return Executors.newFixedThreadPool(10, threadFactory);
     }
 }

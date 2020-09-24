@@ -26,9 +26,7 @@ public class PingSubscriberTests {
 
         List<ILoggingEvent> logsList = listAppender.list;
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(
-                () -> {
-                    assertEquals("reachable: true; duration: 123 ms; server: foo", logsList.get(0).getMessage());
-                }
+                () -> assertEquals("reachable: true; duration: 123 ms; server: foo", logsList.get(0).getMessage())
         );
     }
 }
