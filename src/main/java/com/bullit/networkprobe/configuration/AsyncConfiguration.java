@@ -1,4 +1,4 @@
-package com.bullit.caiwayprobe.configuration;
+package com.bullit.networkprobe.configuration;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.springframework.context.annotation.Bean;

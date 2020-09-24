@@ -1,6 +1,6 @@
-package com.bullit.caiwayprobe.service;
+package com.bullit.networkprobe.service;
 
-import com.bullit.caiwayprobe.domain.PingResponse;
+import com.bullit.networkprobe.domain.PingResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 

@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.bullit</groupId>
-	<artifactId>caiway-probe</artifactId>
+	<artifactId>network-probe</artifactId>
 	<version>0.0.1</version>
-	<name>caiway-probe</name>
-	<description>Probe to measure uptime of Caiway Internet provider</description>
+	<name>network-probe</name>
+	<description>Probe to measure the availability of an Internet connection</description>
 
 	<properties>
 		<java.version>14</java.version>

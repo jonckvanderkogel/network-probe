@@ -1,8 +1,8 @@
-package com.bullit.caiwayprobe.reactive;
+package com.bullit.networkprobe.reactive;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.bullit.caiwayprobe.domain.PingResponse;
-import com.bullit.caiwayprobe.support.MDCLogger;
+import com.bullit.networkprobe.domain.PingResponse;
+import com.bullit.networkprobe.support.MDCLogger;
 import org.junit.jupiter.api.Test;
 
 import java.util.Calendar;
@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static com.bullit.caiwayprobe.reactive.ReactiveTestSupport.setupAppender;
+import static com.bullit.networkprobe.reactive.ReactiveTestSupport.setupAppender;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -1,10 +1,10 @@
-package com.bullit.caiwayprobe.configuration;
+package com.bullit.networkprobe.configuration;
 
-import com.bullit.caiwayprobe.reactive.OutageSubscriber;
-import com.bullit.caiwayprobe.reactive.PingResponsePublisher;
-import com.bullit.caiwayprobe.reactive.PingSubscriber;
-import com.bullit.caiwayprobe.domain.PingResponse;
-import com.bullit.caiwayprobe.support.MDCLogger;
+import com.bullit.networkprobe.reactive.OutageSubscriber;
+import com.bullit.networkprobe.reactive.PingResponsePublisher;
+import com.bullit.networkprobe.reactive.PingSubscriber;
+import com.bullit.networkprobe.domain.PingResponse;
+import com.bullit.networkprobe.support.MDCLogger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

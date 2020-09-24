@@ -1,6 +1,6 @@
-package com.bullit.caiwayprobe.service;
+package com.bullit.networkprobe.service;
 
-import com.bullit.caiwayprobe.support.MDCLogger;
+import com.bullit.networkprobe.support.MDCLogger;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.jodah.concurrentunit.Waiter;
 import org.junit.jupiter.api.Test;

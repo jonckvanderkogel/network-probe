@@ -1,6 +1,6 @@
-package com.bullit.caiwayprobe.reactive;
+package com.bullit.networkprobe.reactive;
 
-import com.bullit.caiwayprobe.support.MDCLogger;
+import com.bullit.networkprobe.support.MDCLogger;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 

@@ -1,4 +1,4 @@
-package com.bullit.caiwayprobe.configuration;
+package com.bullit.networkprobe.configuration;
 
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;

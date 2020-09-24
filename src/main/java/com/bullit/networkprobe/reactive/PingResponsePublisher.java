@@ -1,6 +1,6 @@
-package com.bullit.caiwayprobe.reactive;
+package com.bullit.networkprobe.reactive;
 
-import com.bullit.caiwayprobe.domain.PingResponse;
+import com.bullit.networkprobe.domain.PingResponse;
 
 import javax.annotation.PreDestroy;
 import java.util.concurrent.SubmissionPublisher;
