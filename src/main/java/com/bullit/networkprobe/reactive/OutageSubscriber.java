@@ -69,7 +69,7 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
             };
         }
 
-        public Optional<Outage> reachable() {
+        private Optional<Outage> reachable() {
             if (outageGoingOn) {
                 outageGoingOn = false;
                 return Optional.of(new Outage(startTime, dateSupplier.get()));
@@ -78,7 +78,7 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
             }
         }
 
-        public Optional<Outage> notReachable() {
+        private Optional<Outage> notReachable() {
             if (!outageGoingOn) {
                 outageGoingOn = true;
                 startTime = dateSupplier.get();
