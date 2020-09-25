@@ -15,22 +15,22 @@ import java.util.concurrent.SubmissionPublisher;
 @Configuration
 public class ReactiveStreamsConfiguration {
 
-    @Bean(name="pingResponsePublisher")
+    @Bean
     public SubmissionPublisher<PingResponse> getPingResponsePublisher() {
         return new PingResponsePublisher();
     }
 
-    @Bean(name="outageSubscriber")
+    @Bean
     public Flow.Subscriber<PingResponse> getOutageSubscriber() {
         return new OutageSubscriber(getMdcLogger(), () -> new Date());
     }
 
-    @Bean(name="pingSubscriber")
+    @Bean
     public Flow.Subscriber<PingResponse> getPingSubscriber() {
         return new PingSubscriber(getMdcLogger());
     }
 
-    @Bean(name="mdcLogger")
+    @Bean
     public MDCLogger getMdcLogger() {
         return new MDCLogger();
     }

@@ -29,7 +29,7 @@ public class PingService {
     public PingService(@Autowired @Qualifier("pingExecutor") Executor pingExecutor,
                        @Autowired @Qualifier("dnsServerOne") String dnsServerOne,
                        @Autowired @Qualifier("dnsServerTwo") String dnsServerTwo,
-                       @Autowired @Qualifier("mdcLogger") MDCLogger mdcLogger) {
+                       @Autowired MDCLogger mdcLogger) {
         log.info(String.format("Starting up PingService with servers: %s and %s", dnsServerOne, dnsServerTwo));
         this.pingExecutor = pingExecutor;
         this.serverOne = dnsServerOne;

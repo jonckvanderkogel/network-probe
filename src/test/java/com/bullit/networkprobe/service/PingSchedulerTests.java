@@ -4,6 +4,7 @@ import com.bullit.networkprobe.domain.PingResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
@@ -23,7 +24,7 @@ public class PingSchedulerTests {
         answer.complete(pingResponse);
         when(pingServiceMock.pingDnsServers()).thenReturn(answer);
 
-        var pingScheduler = new PingScheduler(pingServiceMock, publisherMock, outageSubscriberMock, pingSubscriberMock);
+        var pingScheduler = new PingScheduler(pingServiceMock, publisherMock, List.of(outageSubscriberMock, pingSubscriberMock));
         pingScheduler.performPings();
 
         verify(publisherMock).submit(ArgumentMatchers.eq(pingResponse));

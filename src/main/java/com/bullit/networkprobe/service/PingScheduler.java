@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
@@ -17,13 +18,11 @@ public class PingScheduler {
     private final SubmissionPublisher<PingResponse> pingResponsePublisher;
 
     public PingScheduler(@Autowired PingService pingService,
-                         @Autowired @Qualifier("pingResponsePublisher") SubmissionPublisher<PingResponse> pingResponsePublisher,
-                         @Autowired @Qualifier("outageSubscriber") Flow.Subscriber<PingResponse> outageSubscriber,
-                         @Autowired @Qualifier("pingSubscriber") Flow.Subscriber<PingResponse> pingSubscriber) {
+                         @Autowired SubmissionPublisher<PingResponse> pingResponsePublisher,
+                         @Autowired List<Flow.Subscriber<PingResponse>> subscribers) {
         this.pingService = pingService;
         this.pingResponsePublisher = pingResponsePublisher;
-        pingResponsePublisher.subscribe(outageSubscriber);
-        pingResponsePublisher.subscribe(pingSubscriber);
+        subscribers.stream().forEach(pingResponsePublisher::subscribe);
     }
 
     @Scheduled(fixedRate = 1000)
