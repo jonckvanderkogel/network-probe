@@ -1,12 +1,18 @@
+# installing Docker
 brew install docker docker-machine
 brew cask install virtualbox
 brew cask install virtualbox-extension-pack
+
+# create a docker-machine for Elasticsearch/Kibana
 docker-machine create --driver virtualbox --virtualbox-memory 4096 default
+
+# start the docker-machine
+docker-machine start default
 docker-machine env default
 eval $(docker-machine env default)
 
+# stop the docker-machine
 docker-machine stop default
-docker-machine start default
 
 # To find out where docker-machine is running:
 docker-machine ip
