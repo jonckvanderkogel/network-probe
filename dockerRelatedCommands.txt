@@ -1,0 +1,14 @@
+brew install docker docker-machine
+brew cask install virtualbox
+brew cask install virtualbox-extension-pack
+docker-machine create --driver virtualbox --virtualbox-memory 4096 default
+docker-machine env default
+eval $(docker-machine env default)
+
+docker-machine stop default
+docker-machine start default
+
+# To find out where docker-machine is running:
+docker-machine ip
+
+This will return the ip address of docker-machine. Now access Kibana in a browser by using the url <ip_address_docker-machine>:5601
