@@ -3,7 +3,6 @@ package com.bullit.networkprobe.service;
 import com.bullit.networkprobe.domain.PingResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
