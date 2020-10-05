@@ -19,11 +19,11 @@ public class PingServiceTests {
         return executorService;
     }
 
-    private BiFunction<String, String, PingService> pingServiceSupplier = (dnsServer1, dnsServer2) -> new PingService(getPingExecutor(), dnsServer1, dnsServer2, new MDCLogger());
+    private BiFunction<String, String, PingService> pingServiceSupplier = (dnsServer1, dnsServer2) -> new PingService(getPingExecutor(), dnsServer1, dnsServer2, 443, new MDCLogger());
 
     @Test
     public void testPerformPing() throws TimeoutException, InterruptedException {
-        var pingService = pingServiceSupplier.apply("127.0.0.1", "127.0.0.1");
+        var pingService = pingServiceSupplier.apply("8.8.8.8", "8.8.4.4");
         var waiter = new Waiter();
         pingService
                 .pingDnsServers()

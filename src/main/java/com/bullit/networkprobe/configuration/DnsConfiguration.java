@@ -19,6 +19,7 @@ public class DnsConfiguration {
     private String serverOne;
     @Pattern(regexp = IP_ADDRESS)
     private String serverTwo;
+    private Integer port;
 
     @Bean(name="dnsServerOne")
     public String getServerOne() {
@@ -28,5 +29,10 @@ public class DnsConfiguration {
     @Bean(name="dnsServerTwo")
     public String getServerTwo() {
         return this.serverTwo;
+    }
+
+    @Bean(name="port")
+    public Integer getPort() {
+        return this.port;
     }
 }
