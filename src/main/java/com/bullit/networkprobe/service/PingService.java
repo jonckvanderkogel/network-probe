@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -38,8 +40,8 @@ public class PingService {
     }
 
     public CompletableFuture<PingResponse> pingDnsServers() {
-        var pingFuture1 = CompletableFuture.supplyAsync(() -> performPing(serverOne), pingExecutor);
-        var pingFuture2 = CompletableFuture.supplyAsync(() -> performPing(serverTwo), pingExecutor);
+        var pingFuture1 = CompletableFuture.supplyAsync(() -> performPing2(serverOne), pingExecutor);
+        var pingFuture2 = CompletableFuture.supplyAsync(() -> performPing2(serverTwo), pingExecutor);
 
         return CompletableFuture
                 .allOf(pingFuture1, pingFuture2)
@@ -52,14 +54,9 @@ public class PingService {
                 );
     }
 
-    private Optional<PingResponse> performPing(String ipAddress) {
-        try {
-            InetAddress address = InetAddress.getByName(ipAddress);
-            Date now = new Date();
-            boolean isReachable = address.isReachable(900);
-            long timeToRespond = new Date().getTime() - now.getTime();
-
-            return isReachable ? Optional.of(new PingResponse(true, timeToRespond, ipAddress)) : Optional.empty();
+    private boolean isReachable(String ipAddress, int timeOutMillis) {
+        try (Socket soc = new Socket()) {
+            soc.connect(new InetSocketAddress(ipAddress, 443), timeOutMillis);
         } catch (IOException e) {
             mdcLogger.logWithMDCClearing(() -> {
                 MDC.put(MDC_KEY, MDC_VALUE_ERRORS);
@@ -67,7 +64,35 @@ public class PingService {
                 Stream.of(e.getStackTrace()).forEach(l -> log.error(l.toString()));
             });
 
-            return Optional.empty();
+            return false;
         }
+        return true;
     }
+
+    private Optional<PingResponse> performPing2(String ipAddress) {
+        Date now = new Date();
+        boolean isReachable = isReachable(ipAddress,900);
+        long timeToRespond = new Date().getTime() - now.getTime();
+
+        return isReachable ? Optional.of(new PingResponse(true, timeToRespond, ipAddress)) : Optional.empty();
+    }
+
+//    private Optional<PingResponse> performPing(String ipAddress) {
+//        try {
+//            InetAddress address = InetAddress.getByName(ipAddress);
+//            Date now = new Date();
+//            boolean isReachable = address.isReachable(900);
+//            long timeToRespond = new Date().getTime() - now.getTime();
+//
+//            return isReachable ? Optional.of(new PingResponse(true, timeToRespond, ipAddress)) : Optional.empty();
+//        } catch (IOException e) {
+//            mdcLogger.logWithMDCClearing(() -> {
+//                MDC.put(MDC_KEY, MDC_VALUE_ERRORS);
+//                log.error(e.getMessage());
+//                Stream.of(e.getStackTrace()).forEach(l -> log.error(l.toString()));
+//            });
+//
+//            return Optional.empty();
+//        }
+//    }
 }
