@@ -26,8 +26,8 @@ public class ConnectionServiceTests {
         var waiter = new Waiter();
         connectionService
                 .connectToServers()
-                .whenComplete((pingResponse, e) -> {
-                    waiter.assertTrue(pingResponse.isReachable());
+                .whenComplete((connectionResponse, e) -> {
+                    waiter.assertTrue(connectionResponse.isReachable());
                     waiter.assertNull(e);
                     waiter.resume();
                 });

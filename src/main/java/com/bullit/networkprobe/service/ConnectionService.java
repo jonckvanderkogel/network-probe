@@ -42,14 +42,14 @@ public class ConnectionService {
     }
 
     public CompletableFuture<ConnectionResponse> connectToServers() {
-        var pingFuture1 = CompletableFuture.supplyAsync(() -> performConnection(serverOne, port), connectionExecutor);
-        var pingFuture2 = CompletableFuture.supplyAsync(() -> performConnection(serverTwo, port), connectionExecutor);
+        var connectionFuture1 = CompletableFuture.supplyAsync(() -> performConnection(serverOne, port), connectionExecutor);
+        var connectionFuture2 = CompletableFuture.supplyAsync(() -> performConnection(serverTwo, port), connectionExecutor);
 
         return CompletableFuture
-                .allOf(pingFuture1, pingFuture2)
-                .thenApply(ignoredVoid -> pingFuture1
+                .allOf(connectionFuture1, connectionFuture2)
+                .thenApply(ignoredVoid -> connectionFuture1
                         .join()
-                        .orElseGet(() -> pingFuture2
+                        .orElseGet(() -> connectionFuture2
                                 .join()
                                 .orElseGet(() -> new ConnectionResponse(false, 666, "none"))
                         )

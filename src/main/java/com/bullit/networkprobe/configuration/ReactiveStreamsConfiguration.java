@@ -16,7 +16,7 @@ import java.util.concurrent.SubmissionPublisher;
 public class ReactiveStreamsConfiguration {
 
     @Bean
-    public SubmissionPublisher<ConnectionResponse> getPingResponsePublisher() {
+    public SubmissionPublisher<ConnectionResponse> getConnectionResponsePublisher() {
         return new ConnectionResponsePublisher();
     }
 
@@ -26,7 +26,7 @@ public class ReactiveStreamsConfiguration {
     }
 
     @Bean
-    public Flow.Subscriber<ConnectionResponse> getPingSubscriber() {
+    public Flow.Subscriber<ConnectionResponse> getConnectionSubscriber() {
         return new ConnectionSubscriber(getMdcLogger());
     }
 
