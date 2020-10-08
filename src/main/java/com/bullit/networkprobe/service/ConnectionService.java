@@ -58,7 +58,7 @@ public class ConnectionService {
 
     private boolean isReachable(String ipAddress, Integer port, int timeOutMillis) {
         try (Socket soc = new Socket()) {
-            soc.connect(new InetSocketAddress(ipAddress, 443), timeOutMillis);
+            soc.connect(new InetSocketAddress(ipAddress, port), timeOutMillis);
         } catch (IOException e) {
             mdcLogger.logWithMDCClearing(() -> {
                 MDC.put(MDC_KEY, MDC_VALUE_ERRORS);
