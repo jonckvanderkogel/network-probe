@@ -11,22 +11,22 @@ import javax.validation.constraints.Pattern;
 @Validated
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "dns")
-public class DnsConfiguration {
-    private static final String IP_ADDRESS = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+@ConfigurationProperties(prefix = "connection")
+public class ConnectionServerConfiguration {
+    private static final String URL = "^(?:[\\w-]+\\.)+([a-z]|[A-Z]|[0-9]){2,6}$";
 
-    @Pattern(regexp = IP_ADDRESS)
+    @Pattern(regexp = URL)
     private String serverOne;
-    @Pattern(regexp = IP_ADDRESS)
+    @Pattern(regexp = URL)
     private String serverTwo;
     private Integer port;
 
-    @Bean(name="dnsServerOne")
+    @Bean(name="connectionServerOne")
     public String getServerOne() {
         return this.serverOne;
     }
 
-    @Bean(name="dnsServerTwo")
+    @Bean(name="connectionServerTwo")
     public String getServerTwo() {
         return this.serverTwo;
     }

@@ -8,25 +8,24 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
 
-public class PingServiceTests {
-    public Executor getPingExecutor() {
+public class ConnectionServiceTests {
+    public Executor getConnectionExecutor() {
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                .setNameFormat("pingExecutor-%d")
+                .setNameFormat("connectionExecutor-%d")
                 .setDaemon(false)
                 .build();
-        ExecutorService executorService = Executors.newFixedThreadPool(2, threadFactory);
 
-        return executorService;
+        return Executors.newFixedThreadPool(2, threadFactory);
     }
 
-    private BiFunction<String, String, PingService> pingServiceSupplier = (dnsServer1, dnsServer2) -> new PingService(getPingExecutor(), dnsServer1, dnsServer2, 443, new MDCLogger());
+    private BiFunction<String, String, ConnectionService> connectionServiceSupplier = (server1, server2) -> new ConnectionService(getConnectionExecutor(), server1, server2, 443, new MDCLogger());
 
     @Test
-    public void testPerformPing() throws TimeoutException, InterruptedException {
-        var pingService = pingServiceSupplier.apply("8.8.8.8", "8.8.4.4");
+    public void testPerformConnection() throws TimeoutException, InterruptedException {
+        var connectionService = connectionServiceSupplier.apply("intranet.ing.net", "intranet.ing.net");
         var waiter = new Waiter();
-        pingService
-                .pingDnsServers()
+        connectionService
+                .connectToServers()
                 .whenComplete((pingResponse, e) -> {
                     waiter.assertTrue(pingResponse.isReachable());
                     waiter.assertNull(e);

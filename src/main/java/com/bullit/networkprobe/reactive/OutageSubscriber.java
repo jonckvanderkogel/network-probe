@@ -1,6 +1,6 @@
 package com.bullit.networkprobe.reactive;
 
-import com.bullit.networkprobe.domain.PingResponse;
+import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 import static com.bullit.networkprobe.support.MDCLogger.*;
 
 @Slf4j
-public class OutageSubscriber extends BaseSubscriber<PingResponse> {
+public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
     private final OutageMarker outageMarker = new OutageMarker();
     // SimpleDateFormat is not thread safe so make sure to get a new instance every time you use it
     private final Supplier<SimpleDateFormat> dfSupplier = () -> new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
@@ -27,7 +27,7 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
     }
 
     @Override
-    public void onNext(PingResponse item) {
+    public void onNext(ConnectionResponse item) {
         outageMarker.handleMessage(item).ifPresent(outage -> mdcLogger.logWithMDCClearing(() -> {
             MDC.put(MDC_KEY, MDC_VALUE_OUTAGES);
             MDC.put("from", dfSupplier.get().format(outage.getFrom()));
@@ -41,7 +41,7 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
     @Override
     public void onComplete() {
         // Send one last message manually to ensure an ongoing outage will be logged on exit
-        onNext(new PingResponse(true, 666, "shutdown signal"));
+        onNext(new ConnectionResponse(true, 666, "shutdown signal"));
         super.onComplete();
     }
 
@@ -62,7 +62,7 @@ public class OutageSubscriber extends BaseSubscriber<PingResponse> {
         private boolean outageGoingOn = false;
         private Date startTime;
 
-        public Optional<Outage> handleMessage(PingResponse item) {
+        public Optional<Outage> handleMessage(ConnectionResponse item) {
             return switch (item.getReachableState()) {
                 case REACHABLE -> reachable();
                 case NOT_REACHABLE -> notReachable();

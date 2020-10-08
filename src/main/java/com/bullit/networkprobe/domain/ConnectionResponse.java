@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 @Data
 @Getter
 @RequiredArgsConstructor
-public class PingResponse {
+public class ConnectionResponse {
     private final boolean reachable;
     private final long responseTime;
-    private final String dnsServerAddress;
+    private final String server;
 
     public ReachableState getReachableState() {
         return ReachableState.getState(reachable);

@@ -1,7 +1,7 @@
 package com.bullit.networkprobe.reactive;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.bullit.networkprobe.domain.PingResponse;
+import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.junit.jupiter.api.Test;
 
@@ -13,16 +13,16 @@ import static com.bullit.networkprobe.reactive.ReactiveTestSupport.setupAppender
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PingSubscriberTests {
+public class ConnectionSubscriberTests {
 
     @Test
-    public void whenReceivingPingResponseShouldLog() {
-        var listAppender = setupAppender(PingSubscriber.class);
-        var pingSubscriber = new PingSubscriber(new MDCLogger());
-        var pingResultPublisher = new SubmissionPublisher<PingResponse>();
-        pingResultPublisher.subscribe(pingSubscriber);
-        pingResultPublisher.submit(new PingResponse(true, 123, "foo"));
-        pingResultPublisher.close();
+    public void whenReceivingConnectionResponseShouldLog() {
+        var listAppender = setupAppender(ConnectionSubscriber.class);
+        var connectionSubscriber = new ConnectionSubscriber(new MDCLogger());
+        var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
+        connectionResultPublisher.subscribe(connectionSubscriber);
+        connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));
+        connectionResultPublisher.close();
 
         List<ILoggingEvent> logsList = listAppender.list;
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(

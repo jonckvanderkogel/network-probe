@@ -1,7 +1,7 @@
 package com.bullit.networkprobe.reactive;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import com.bullit.networkprobe.domain.PingResponse;
+import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.junit.jupiter.api.Test;
 
@@ -28,20 +28,20 @@ public class OutageSubscriberTests {
         return () -> dates.get(atomicInteger.getAndAdd(1));
     }
 
-    private PingResponse producePingResponse(boolean reachable) {
-        return new PingResponse(reachable, 5, "foo");
+    private ConnectionResponse produceConnectionResponse(boolean reachable) {
+        return new ConnectionResponse(reachable, 5, "foo");
     }
 
     @Test
-    public void havingNonReachablePingResultsShouldResultInAnOutage() {
+    public void havingNonReachableConnectionResultsShouldResultInAnOutage() {
         var listAppender = setupAppender(OutageSubscriber.class);;
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier());
-        var pingResultPublisher = new SubmissionPublisher<PingResponse>();
-        pingResultPublisher.subscribe(outageSubscriber);
-        pingResultPublisher.submit(producePingResponse(true));
-        pingResultPublisher.submit(producePingResponse(false));
-        pingResultPublisher.submit(producePingResponse(true));
-        pingResultPublisher.close();
+        var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
+        connectionResultPublisher.subscribe(outageSubscriber);
+        connectionResultPublisher.submit(produceConnectionResponse(true));
+        connectionResultPublisher.submit(produceConnectionResponse(false));
+        connectionResultPublisher.submit(produceConnectionResponse(true));
+        connectionResultPublisher.close();
 
         List<ILoggingEvent> logsList = listAppender.list;
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(
@@ -58,11 +58,11 @@ public class OutageSubscriberTests {
     public void terminatingPublisherDuringOutageShouldStillResultInAnOutage() {
         var listAppender = setupAppender(OutageSubscriber.class);
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier());
-        var pingResultPublisher = new SubmissionPublisher<PingResponse>();
-        pingResultPublisher.subscribe(outageSubscriber);
-        pingResultPublisher.submit(producePingResponse(true));
-        pingResultPublisher.submit(producePingResponse(false));
-        pingResultPublisher.close();
+        var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
+        connectionResultPublisher.subscribe(outageSubscriber);
+        connectionResultPublisher.submit(produceConnectionResponse(true));
+        connectionResultPublisher.submit(produceConnectionResponse(false));
+        connectionResultPublisher.close();
 
         List<ILoggingEvent> logsList = listAppender.list;
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(

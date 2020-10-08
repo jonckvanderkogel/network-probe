@@ -6,7 +6,7 @@ public class MDCLogger {
     public static final String MDC_KEY = "network-probe";
     public static final String MDC_VALUE_SYSTEM = "system";
     public static final String MDC_VALUE_ERRORS = "errors";
-    public static final String MDC_VALUE_PINGS = "pings";
+    public static final String MDC_VALUE_CONNECTIONS = "connections";
     public static final String MDC_VALUE_OUTAGES = "outages";
 
     /**

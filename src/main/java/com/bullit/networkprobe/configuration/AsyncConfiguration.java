@@ -10,10 +10,10 @@ import java.util.concurrent.ThreadFactory;
 
 @Configuration
 public class AsyncConfiguration {
-    @Bean(name="pingExecutor")
-    public Executor getPingExecutor() {
+    @Bean(name= "connectionExecutor")
+    public Executor getConnectionExecutor() {
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                .setNameFormat("pingExecutor-%d")
+                .setNameFormat("connectionExecutor-%d")
                 .setDaemon(false)
                 .build();
 
