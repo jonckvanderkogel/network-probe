@@ -5,4 +5,4 @@ mvn clean package
 java -jar target/network-probe-0.0.1.jar
 
 # Run with externalized configuration
-sudo java -jar target/network-probe-0.0.1.jar --spring.config.location=file:///Users/jonck/Documents/dev/code/caiway-probe/test-connectivity.properties
+sudo java -jar target/network-probe-0.0.1.jar --spring.config.location=file:///Users/jonck/Documents/dev/code/network-probe/test-connectivity.properties

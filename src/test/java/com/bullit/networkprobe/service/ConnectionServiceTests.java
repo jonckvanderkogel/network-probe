@@ -18,7 +18,7 @@ public class ConnectionServiceTests {
         return Executors.newFixedThreadPool(2, threadFactory);
     }
 
-    private BiFunction<String, String, ConnectionService> connectionServiceSupplier = (server1, server2) -> new ConnectionService(getConnectionExecutor(), server1, server2, 443, new MDCLogger());
+    private BiFunction<String, String, ConnectionService> connectionServiceSupplier = (server1, server2) -> new ConnectionService(getConnectionExecutor(), server1, server2, 443, 900, new MDCLogger());
 
     @Test
     public void testPerformConnection() throws TimeoutException, InterruptedException {

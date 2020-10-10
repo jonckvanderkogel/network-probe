@@ -20,6 +20,7 @@ public class ConnectionServerConfiguration {
     @Pattern(regexp = URL)
     private String serverTwo;
     private Integer port;
+    private Integer timeOutMillis;
 
     @Bean(name="connectionServerOne")
     public String getServerOne() {
@@ -34,5 +35,10 @@ public class ConnectionServerConfiguration {
     @Bean(name="port")
     public Integer getPort() {
         return this.port;
+    }
+
+    @Bean(name="timeOutMillis")
+    public Integer getTimeOutMillis() {
+        return this.timeOutMillis;
     }
 }

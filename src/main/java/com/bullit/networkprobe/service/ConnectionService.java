@@ -25,6 +25,7 @@ public class ConnectionService {
     private final String serverOne;
     private final String serverTwo;
     private final Integer port;
+    private final Integer timeOutMillis;
     private final Executor connectionExecutor;
     private final MDCLogger mdcLogger;
 
@@ -32,18 +33,20 @@ public class ConnectionService {
                              @Autowired @Qualifier("connectionServerOne") String serverOne,
                              @Autowired @Qualifier("connectionServerTwo") String serverTwo,
                              @Autowired @Qualifier("port") Integer port,
+                             @Autowired @Qualifier("timeOutMillis") Integer timeOutMillis,
                              @Autowired MDCLogger mdcLogger) {
         log.info(String.format("Starting up ConnectionService with servers: %s and %s", serverOne, serverTwo));
         this.connectionExecutor = connectionExecutor;
         this.serverOne = serverOne;
         this.serverTwo = serverTwo;
         this.port = port;
+        this.timeOutMillis = timeOutMillis;
         this.mdcLogger = mdcLogger;
     }
 
     public CompletableFuture<ConnectionResponse> connectToServers() {
-        var connectionFuture1 = CompletableFuture.supplyAsync(() -> performConnection(serverOne, port), connectionExecutor);
-        var connectionFuture2 = CompletableFuture.supplyAsync(() -> performConnection(serverTwo, port), connectionExecutor);
+        var connectionFuture1 = CompletableFuture.supplyAsync(() -> performConnection(serverOne, port, timeOutMillis), connectionExecutor);
+        var connectionFuture2 = CompletableFuture.supplyAsync(() -> performConnection(serverTwo, port, timeOutMillis), connectionExecutor);
 
         return CompletableFuture
                 .allOf(connectionFuture1, connectionFuture2)
@@ -56,9 +59,9 @@ public class ConnectionService {
                 );
     }
 
-    private boolean isReachable(String ipAddress, Integer port, int timeOutMillis) {
+    private boolean isReachable(String url, Integer port, int timeOutMillis) {
         try (Socket soc = new Socket()) {
-            soc.connect(new InetSocketAddress(ipAddress, port), timeOutMillis);
+            soc.connect(new InetSocketAddress(url, port), timeOutMillis);
         } catch (IOException e) {
             mdcLogger.logWithMDCClearing(() -> {
                 MDC.put(MDC_KEY, MDC_VALUE_ERRORS);
@@ -71,11 +74,11 @@ public class ConnectionService {
         return true;
     }
 
-    private Optional<ConnectionResponse> performConnection(String ipAddress, Integer port) {
+    private Optional<ConnectionResponse> performConnection(String url, Integer port, Integer timeOutMillis) {
         Date now = new Date();
-        boolean isReachable = isReachable(ipAddress, port,900);
+        boolean isReachable = isReachable(url, port,timeOutMillis);
         long timeToRespond = new Date().getTime() - now.getTime();
 
-        return isReachable ? Optional.of(new ConnectionResponse(true, timeToRespond, ipAddress)) : Optional.empty();
+        return isReachable ? Optional.of(new ConnectionResponse(true, timeToRespond, url)) : Optional.empty();
     }
 }
