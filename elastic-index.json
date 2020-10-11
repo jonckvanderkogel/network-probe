@@ -42,6 +42,50 @@ curl -X PUT "localhost:9200/_index_template/network-probe-template" -H 'Content-
 }
 '
 
+curl -X PUT "localhost:9200/_template/network-probe-template" -H 'Content-Type: application/json' -d'
+{
+  "index_patterns": ["network-probe-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "context": {
+          "type": "keyword"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "logger": {
+          "type": "keyword"
+        },
+        "mdc": {
+          "properties": {
+            "responseTime":  { "type": "integer" },
+            "reachable": { "type": "boolean"},
+            "server": { "type": "keyword" }
+          }
+        },
+        "message": {
+          "type": "text"
+        },
+        "thread": {
+          "type": "keyword"
+        },
+        "timestamp": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss.SSS"
+        }
+      }
+    }
+  }
+}
+'
+
 
 
 curl -X PUT "localhost:9200/network-probe-template?pretty" -H 'Content-Type: application/json' -d'

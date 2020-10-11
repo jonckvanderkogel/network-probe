@@ -1,0 +1,17 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /Users/jonck/Documents/dev/network-probe/logs/connections.log
+  json.keys_under_root: true
+  json.add_error_key: true
+
+setup.template.settings:
+  index.number_of_shards: 1
+setup.template.name: "network-probe-template"
+setup.template.pattern: "network-probe-*"
+setup.ilm.enabled: false # I set this to false according to what I read here: https://discuss.elastic.co/t/filebat-create-a-custom-index-on-elasticsearch/197741 
+
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  index: "network-probe-%{[beat.version]}-%{+yyyy.MM.dd}"
