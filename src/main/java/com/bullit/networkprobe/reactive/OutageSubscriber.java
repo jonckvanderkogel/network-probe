@@ -18,7 +18,7 @@ import static com.bullit.networkprobe.support.MDCLogger.*;
 public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
     private final OutageMarker outageMarker = new OutageMarker();
     // SimpleDateFormat is not thread safe so make sure to get a new instance every time you use it
-    private final Supplier<SimpleDateFormat> dfSupplier = () -> new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
+    private final Supplier<SimpleDateFormat> dfSupplier = () -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     private final Supplier<Date> dateSupplier;
 
     public OutageSubscriber(MDCLogger mdcLogger, Supplier<Date> dateSupplier) {
