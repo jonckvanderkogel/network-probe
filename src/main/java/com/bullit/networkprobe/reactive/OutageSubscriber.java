@@ -55,7 +55,6 @@ public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
         }
     }
 
-    @Setter
     @Getter
     private class OutageMarker {
         private boolean outageGoingOn = false;
