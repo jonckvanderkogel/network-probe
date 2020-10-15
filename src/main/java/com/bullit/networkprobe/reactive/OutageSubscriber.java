@@ -3,7 +3,6 @@ package com.bullit.networkprobe.reactive;
 import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
@@ -55,7 +54,6 @@ public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
         }
     }
 
-    @Getter
     private class OutageMarker {
         private boolean outageGoingOn = false;
         private Date startTime;
