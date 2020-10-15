@@ -8,11 +8,13 @@ import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.function.Supplier;
@@ -36,8 +38,11 @@ public class ReactiveStreamsConfiguration {
     }
 
     @Bean
-    public Flow.Subscriber<ConnectionResponse> getElasticsearchSubscriber(@Autowired RestHighLevelClient restHighLevelClient) {
-        return new ElasticsearchSubscriber(getMdcLogger(), restHighLevelClient, getDateFormatSupplier());
+    public Flow.Subscriber<ConnectionResponse> getElasticsearchSubscriber(
+            @Autowired RestHighLevelClient restHighLevelClient,
+            @Autowired @Qualifier("elasticSearchExecutor") Executor executor
+            ) {
+        return new ElasticsearchSubscriber(getMdcLogger(), restHighLevelClient, getDateFormatSupplier(), executor);
     }
 
     @Bean

@@ -1,0 +1,28 @@
+curl -X PUT "localhost:9200/network-probe-template?pretty" -H 'Content-Type: application/json' -d'
+{
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    {
+        "properties": {
+            "timestamp": {
+                "type": "date",
+                "format": "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+            },
+            "responseTime": {
+                "type": "integer"
+            },
+            "reachable": {
+                "type": "keyword"
+            }
+        }
+    }
+  }
+}
+'
+
+Timelion:
+.es(q=reachable:true, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Reachable").color(green).log(),
+.es(q=reachable:true, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Trend").trend().color(blue),
+.es(q=reachable:false, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Not reachable").color(red).log().lines(width=100).min(0.7)

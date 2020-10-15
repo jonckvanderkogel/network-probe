@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static com.bullit.networkprobe.configuration.ElasticsearchConfiguration.INDEX;
 import static com.bullit.networkprobe.support.MDCLogger.*;
@@ -23,15 +23,21 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
     private final RestHighLevelClient client;
     private final static String SUBSCRIBER_NAME = "ElasticsearchSubscriber";
     private final Supplier<SimpleDateFormat> dfSupplier;
+    private final Executor executor;
 
-    public ElasticsearchSubscriber(MDCLogger mdcLogger, RestHighLevelClient client, Supplier<SimpleDateFormat> dateFormatSupplier) {
+    public ElasticsearchSubscriber(MDCLogger mdcLogger, RestHighLevelClient client, Supplier<SimpleDateFormat> dateFormatSupplier, Executor executor) {
         super(mdcLogger, SUBSCRIBER_NAME);
         this.client = client;
         this.dfSupplier = dateFormatSupplier;
+        this.executor = executor;
     }
 
     @Override
     public void performOnNext(ConnectionResponse item) {
+        executor.execute(() -> indexConnectionResponse(item));
+    }
+
+    private void indexConnectionResponse(ConnectionResponse item) {
         IndexRequest indexRequest = new IndexRequest(INDEX);
         indexRequest.source(
                 Map.of(
