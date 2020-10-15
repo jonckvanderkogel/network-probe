@@ -30,7 +30,7 @@ public class OutageSubscriberTests {
     }
 
     private Supplier<SimpleDateFormat> createDateFormatSupplier() {
-        return () -> new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
+        return () -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     }
 
     private ConnectionResponse produceConnectionResponse(boolean reachable) {
@@ -52,8 +52,8 @@ public class OutageSubscriberTests {
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(
                 () -> {
                     var mdcMap = logsList.get(0).getMDCPropertyMap();
-                    assertEquals("2020-09-23 20:50:44.000", mdcMap.get("from"));
-                    assertEquals("2020-09-23 20:53:22.000", mdcMap.get("to"));
+                    assertEquals("2020-09-23T20:50:44.000+0200", mdcMap.get("from"));
+                    assertEquals("2020-09-23T20:53:22.000+0200", mdcMap.get("to"));
                     assertEquals("Outage", logsList.get(0).getMessage());
                 }
         );
@@ -73,8 +73,8 @@ public class OutageSubscriberTests {
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(
                 () -> {
                     var mdcMap = logsList.get(0).getMDCPropertyMap();
-                    assertEquals("2020-09-23 20:50:44.000", mdcMap.get("from"));
-                    assertEquals("2020-09-23 20:53:22.000", mdcMap.get("to"));
+                    assertEquals("2020-09-23T20:50:44.000+0200", mdcMap.get("from"));
+                    assertEquals("2020-09-23T20:53:22.000+0200", mdcMap.get("to"));
                     assertEquals("Outage", logsList.get(0).getMessage());
                 }
         );

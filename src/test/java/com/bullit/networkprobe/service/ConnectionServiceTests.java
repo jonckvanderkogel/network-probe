@@ -22,7 +22,7 @@ public class ConnectionServiceTests {
 
     @Test
     public void testPerformConnection() throws TimeoutException, InterruptedException {
-        var connectionService = connectionServiceSupplier.apply("intranet.ing.net", "intranet.ing.net");
+        var connectionService = connectionServiceSupplier.apply("www.google.com", "www.nu.nl");
         var waiter = new Waiter();
         connectionService
                 .connectToServers()
