@@ -5,6 +5,7 @@ import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.junit.jupiter.api.Test;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -28,6 +29,10 @@ public class OutageSubscriberTests {
         return () -> dates.get(atomicInteger.getAndAdd(1));
     }
 
+    private Supplier<SimpleDateFormat> createDateFormatSupplier() {
+        return () -> new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss.SSS");
+    }
+
     private ConnectionResponse produceConnectionResponse(boolean reachable) {
         return new ConnectionResponse(reachable, 5, "foo");
     }
@@ -35,7 +40,7 @@ public class OutageSubscriberTests {
     @Test
     public void havingNonReachableConnectionResultsShouldResultInAnOutage() {
         var listAppender = setupAppender(OutageSubscriber.class);;
-        var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier());
+        var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), createDateFormatSupplier());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         connectionResultPublisher.subscribe(outageSubscriber);
         connectionResultPublisher.submit(produceConnectionResponse(true));
@@ -57,7 +62,7 @@ public class OutageSubscriberTests {
     @Test
     public void terminatingPublisherDuringOutageShouldStillResultInAnOutage() {
         var listAppender = setupAppender(OutageSubscriber.class);
-        var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier());
+        var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), createDateFormatSupplier());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         connectionResultPublisher.subscribe(outageSubscriber);
         connectionResultPublisher.submit(produceConnectionResponse(true));

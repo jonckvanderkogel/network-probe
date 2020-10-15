@@ -14,12 +14,12 @@ public class ConnectionSubscriber extends BaseSubscriber<ConnectionResponse> {
     }
 
     @Override
-    public void onNext(ConnectionResponse item) {
+    public void performOnNext(ConnectionResponse item) {
         mdcLogger.logWithMDCClearing(() -> {
             MDC.put(MDC_KEY, MDC_VALUE_CONNECTIONS);
             MDC.put("reachable", String.valueOf(item.isReachable()));
             MDC.put("responseTime", String.valueOf(item.getResponseTime()));
-            MDC.put("dnsServer", item.getServer());
+            MDC.put("server", item.getServer());
             log.info(
                     String.format("reachable: %s; duration: %s ms; server: %s",
                             item.isReachable(),
@@ -28,7 +28,5 @@ public class ConnectionSubscriber extends BaseSubscriber<ConnectionResponse> {
                     )
             );
         });
-
-        subscription.request(1);
     }
 }

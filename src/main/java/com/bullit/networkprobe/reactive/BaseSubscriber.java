@@ -20,6 +20,14 @@ public abstract class BaseSubscriber<T> implements Flow.Subscriber<T> {
         this.subscriberName = subscriberName;
     }
 
+    public abstract void performOnNext(T item);
+
+    @Override
+    public void onNext(T item) {
+        performOnNext(item);
+        subscription.request(1);
+    }
+
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
         this.subscription = subscription;
