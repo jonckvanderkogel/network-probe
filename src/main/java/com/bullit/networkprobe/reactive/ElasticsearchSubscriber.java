@@ -27,15 +27,22 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
     private final Executor executor;
 
     /**
-     * We are externalizing the Elasticsearch client and the function to create index requests because of
-     * design issues in the Elasticsearch code that doesn't allow for proper mocking of its classes.
-     * Therefore we have to wrap everything in our own classes that can be properly mocked.
-     * @param mdcLogger
-     * @param client
-     * @param dateSupplier
-     * @param dateFormatSupplier
-     * @param createIndexRequestFun
-     * @param executor
+     * @param mdcLogger MDCLogger bean which allows to use the MDC mechanism for logging. We need
+     *                  this instance because we are using reactive code here and then you need to
+     *                  clear the MDC context before logging since you don't know which thread your
+     *                  code is running on.
+     * @param client ElasticsearchClientWrapper wraps the RestHighLevelClient. This is necessary
+     *               because of design issues with the Elasticsearch code which doesn't allow for
+     *               proper mocking of their classes.
+     * @param dateSupplier a Supplier function that is used to get Date instances. Externalizing this
+     *                     for test purposes.
+     * @param dateFormatSupplier a Supplier function that returns a SimpleDateFormat instance since these
+     *                           are not Thread safe
+     * @param createIndexRequestFun function that takes a ConnectionResponse and a timestamp string and
+     *                              produces an IndexRequest from these. We have to make this a function
+     *                              for testing purposes since mocking a IndexRequest does not work properly.
+     *                              Same issue as with the RestHighLevelClient.
+     * @param executor the Executor that will run index calls to Elasticsearch
      */
     public ElasticsearchSubscriber(MDCLogger mdcLogger,
                                    ElasticsearchClientWrapper client,
