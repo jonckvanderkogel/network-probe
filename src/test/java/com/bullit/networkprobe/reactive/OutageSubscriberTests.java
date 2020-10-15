@@ -5,33 +5,15 @@ import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.junit.jupiter.api.Test;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
-import static com.bullit.networkprobe.reactive.ReactiveTestSupport.setupAppender;
+import static com.bullit.networkprobe.reactive.ReactiveTestSupport.*;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OutageSubscriberTests {
-
-    private Supplier<Date> createFixedDateSupplier() {
-        Date date1 = new GregorianCalendar(2020, Calendar.SEPTEMBER, 23, 20, 50, 44).getTime();
-        Date date2 = new GregorianCalendar(2020, Calendar.SEPTEMBER, 23, 20, 53, 22).getTime();
-        final List<Date> dates = List.of(date1, date2);
-        final AtomicInteger atomicInteger = new AtomicInteger();
-        return () -> dates.get(atomicInteger.getAndAdd(1));
-    }
-
-    private Supplier<SimpleDateFormat> createDateFormatSupplier() {
-        return () -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-    }
 
     private ConnectionResponse produceConnectionResponse(boolean reachable) {
         return new ConnectionResponse(reachable, 5, "foo");
@@ -39,7 +21,7 @@ public class OutageSubscriberTests {
 
     @Test
     public void havingNonReachableConnectionResultsShouldResultInAnOutage() {
-        var listAppender = setupAppender(OutageSubscriber.class);;
+        var listAppender = setupAppender(OutageSubscriber.class);
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), createDateFormatSupplier());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         connectionResultPublisher.subscribe(outageSubscriber);

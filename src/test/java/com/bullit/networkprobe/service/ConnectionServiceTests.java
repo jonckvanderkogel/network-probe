@@ -8,17 +8,11 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.*;
 import java.util.function.BiFunction;
 
+import static com.bullit.networkprobe.reactive.ReactiveTestSupport.createTestExecutor;
+
 public class ConnectionServiceTests {
-    public Executor getConnectionExecutor() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                .setNameFormat("connectionExecutor-%d")
-                .setDaemon(false)
-                .build();
 
-        return Executors.newFixedThreadPool(2, threadFactory);
-    }
-
-    private BiFunction<String, String, ConnectionService> connectionServiceSupplier = (server1, server2) -> new ConnectionService(getConnectionExecutor(), server1, server2, 443, 900, new MDCLogger());
+    private BiFunction<String, String, ConnectionService> connectionServiceSupplier = (server1, server2) -> new ConnectionService(createTestExecutor(), server1, server2, 443, 900, new MDCLogger());
 
     @Test
     public void testPerformConnection() throws TimeoutException, InterruptedException {
