@@ -17,6 +17,8 @@
 	<properties>
 		<java.version>15</java.version>
 		<elasticsearch.version>7.9.2</elasticsearch.version>
+		<guava.version>27.0.1-jre</guava.version>
+		<reactor.version>3.3.10.RELEASE</reactor.version>
 	</properties>
 
 	<dependencies>
@@ -32,7 +34,12 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>27.0.1-jre</version>
+			<version>${guava.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+			<version>${reactor.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>

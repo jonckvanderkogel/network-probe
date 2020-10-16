@@ -3,14 +3,15 @@ package com.bullit.networkprobe.reactive;
 import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.slf4j.MDC;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -24,7 +25,6 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
     private final Supplier<SimpleDateFormat> dfSupplier;
     private final Supplier<Date> dateSupplier;
     private final BiFunction<ConnectionResponse, String, IndexRequest> createIndexRequestFun;
-    private final Executor executor;
 
     /**
      * @param mdcLogger MDCLogger bean which allows to use the MDC mechanism for logging. We need
@@ -42,44 +42,54 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
      *                              produces an IndexRequest from these. We have to make this a function
      *                              for testing purposes since mocking a IndexRequest does not work properly.
      *                              Same issue as with the RestHighLevelClient.
-     * @param executor the Executor that will run index calls to Elasticsearch
      */
     public ElasticsearchSubscriber(MDCLogger mdcLogger,
                                    ElasticsearchClientWrapper client,
                                    Supplier<Date> dateSupplier,
                                    Supplier<SimpleDateFormat> dateFormatSupplier,
-                                   BiFunction<ConnectionResponse, String, IndexRequest> createIndexRequestFun,
-                                   Executor executor) {
+                                   BiFunction<ConnectionResponse, String, IndexRequest> createIndexRequestFun) {
         super(mdcLogger, SUBSCRIBER_NAME);
         this.client = client;
         this.dfSupplier = dateFormatSupplier;
         this.dateSupplier = dateSupplier;
         this.createIndexRequestFun = createIndexRequestFun;
-        this.executor = executor;
     }
 
     @Override
     public void performOnNext(ConnectionResponse item) {
-        executor.execute(() -> indexConnectionResponse(item));
+        indexConnectionResponse(item)
+                .doOnError(e -> {
+                    mdcLogger.logWithMDCClearing(() -> {
+                        MDC.put(MDC_KEY, MDC_VALUE_MISSED);
+                        MDC.put("reachable", String.valueOf(item.isReachable()));
+                        MDC.put("responseTime", String.valueOf(item.getResponseTime()));
+                        MDC.put("server", item.getServer());
+                        log.info("missed");
+                    });
+                })
+                .subscribe();
     }
 
-    private void indexConnectionResponse(ConnectionResponse item) {
-        try {
-            client.index(createIndexRequestFun
-                    .apply(
-                            item,
-                            dfSupplier.get().format(dateSupplier.get())
-                    ),
-                    RequestOptions.DEFAULT
-            );
-        } catch (IOException e) {
-            mdcLogger.logWithMDCClearing(() -> {
-                MDC.put(MDC_KEY, MDC_VALUE_MISSED);
-                MDC.put("reachable", String.valueOf(item.isReachable()));
-                MDC.put("responseTime", String.valueOf(item.getResponseTime()));
-                MDC.put("server", item.getServer());
-                log.info("missed");
-            });
-        }
+    private Mono<IndexResponse> indexConnectionResponse(ConnectionResponse item) {
+        return Mono.create(sink -> client.indexAsync
+                (
+                        createIndexRequestFun.apply(
+                                item,
+                                dfSupplier.get().format(dateSupplier.get())
+                        ),
+                        RequestOptions.DEFAULT,
+                        new ActionListener<>() {
+                            @Override
+                            public void onResponse(IndexResponse indexResponse) {
+                                sink.success(indexResponse);
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                sink.error(e);
+                            }
+                        }
+                )
+        );
     }
 }

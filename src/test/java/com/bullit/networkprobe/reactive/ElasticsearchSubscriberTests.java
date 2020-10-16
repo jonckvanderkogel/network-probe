@@ -4,7 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.Cancellable;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -22,21 +22,20 @@ import static org.mockito.Mockito.*;
 public class ElasticsearchSubscriberTests {
 
     @Test
-    public void whenReceivingMessageShouldSendToElasticsearch() throws IOException {
+    public void whenReceivingMessageShouldSendToElasticsearch() {
         var esClienWrapperMock = mock(ElasticsearchClientWrapper.class);
         var elasticsearchSubscriber = new ElasticsearchSubscriber(
                 new MDCLogger(),
                 esClienWrapperMock,
                 createFixedDateSupplier(),
                 createDateFormatSupplier(),
-                (connectionResponse, timestamp) -> mock(IndexRequest.class),
-                createTestExecutor());
+                (connectionResponse, timestamp) -> mock(IndexRequest.class));
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         connectionResultPublisher.subscribe(elasticsearchSubscriber);
         connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));
         connectionResultPublisher.close();
 
-        when(esClienWrapperMock.index(any(), any())).thenReturn(mock(IndexResponse.class));
+        when(esClienWrapperMock.indexAsync(any(), any(), any())).thenReturn(mock(Cancellable.class));
 
         IndexRequest expectedIndexRequest = new IndexRequest(INDEX);
         expectedIndexRequest.source(
@@ -48,27 +47,23 @@ public class ElasticsearchSubscriberTests {
         );
 
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(
-                () -> verify(esClienWrapperMock, times(1)).index(any(), any())
+                () -> verify(esClienWrapperMock, times(1)).indexAsync(any(), any(), any())
         );
     }
 
     @Test
     public void whenRestClientThrowsExceptionWeShouldGetTheLineInTheMissedLogs() {
         var listAppender = setupAppender(ElasticsearchSubscriber.class);
-        // for some reason the below code was not working, to be figured out!!
-        // In the meantime just putting in an implementatino of ElasticsearchClientWrapper that throws exceptions
-        // var esClienWrapperMock = mock(ElasticsearchClientWrapper.class);
-        // when(esClienWrapperMock.index(any(), any())).thenThrow(IOException.class);
-        // Also had to replace the IndexRequest creation function to return nulls as even mocking IndexRequest did not work
 
-        ElasticsearchClientWrapper wrapper = (i, r) -> {throw new IOException();};
         var elasticsearchSubscriber = new ElasticsearchSubscriber(
                 new MDCLogger(),
-                (r, o) -> {throw new IOException();},
+                (i, o, l) -> {
+                    l.onFailure(new IOException());
+                    return null;
+                },
                 createFixedDateSupplier(),
                 createDateFormatSupplier(),
-                (c, t) -> null,
-                createTestExecutor());
+                (c, t) -> null);
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         connectionResultPublisher.subscribe(elasticsearchSubscriber);
         connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));

@@ -7,8 +7,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 @Configuration
@@ -18,19 +16,23 @@ public class ElasticsearchConfiguration {
     @Bean(destroyMethod = "close")
     public RestHighLevelClient client() {
         return new RestHighLevelClient(
-                RestClient.builder(
-                        new HttpHost("localhost", 9200, "http")
-                )
+                RestClient
+                        .builder(new HttpHost("localhost", 9200, "http"))
+                        .setRequestConfigCallback(config -> config
+                                .setConnectTimeout(5_000)
+                                .setConnectionRequestTimeout(5_000)
+                                .setSocketTimeout(5_000)
+                        )
+                        .setHttpClientConfigCallback(
+                                httpAsyncClientBuilder -> httpAsyncClientBuilder.setThreadFactory(elasticsearchThreadFactory())
+                        )
         );
     }
 
-    @Bean(name = "elasticsearchExecutor")
-    public Executor elasticSearchExecutor() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                .setNameFormat("elasticSearchExecutor-%d")
+    private ThreadFactory elasticsearchThreadFactory() {
+        return new ThreadFactoryBuilder()
+                .setNameFormat("elasticsearchThread-%d")
                 .setDaemon(false)
                 .build();
-
-        return Executors.newFixedThreadPool(10, threadFactory);
     }
 }
