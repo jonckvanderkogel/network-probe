@@ -9,11 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.TimeUnit;
 
-import static com.bullit.networkprobe.configuration.ElasticsearchConfiguration.INDEX;
 import static com.bullit.networkprobe.reactive.ReactiveTestSupport.*;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,22 +35,13 @@ public class ElasticsearchSubscriberTests {
 
         when(esClienWrapperMock.indexAsync(any(), any(), any())).thenReturn(mock(Cancellable.class));
 
-        IndexRequest expectedIndexRequest = new IndexRequest(INDEX);
-        expectedIndexRequest.source(
-                Map.of(
-                        "timestamp", "2020-09-23T20:50:44.000+0200",
-                        "responseTime", 123,
-                        "reachable", true
-                )
-        );
-
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(
                 () -> verify(esClienWrapperMock, times(1)).indexAsync(any(), any(), any())
         );
     }
 
     @Test
-    public void whenRestClientThrowsExceptionWeShouldGetTheLineInTheMissedLogs() {
+    public void whenRestClientHasExceptionWeShouldGetTheLineInTheMissedLogs() {
         var listAppender = setupAppender(ElasticsearchSubscriber.class);
 
         var elasticsearchSubscriber = new ElasticsearchSubscriber(

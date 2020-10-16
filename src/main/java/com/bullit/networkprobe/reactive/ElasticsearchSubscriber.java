@@ -9,6 +9,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.slf4j.MDC;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -78,18 +79,26 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
                                 dfSupplier.get().format(dateSupplier.get())
                         ),
                         RequestOptions.DEFAULT,
-                        new ActionListener<>() {
-                            @Override
-                            public void onResponse(IndexResponse indexResponse) {
-                                sink.success(indexResponse);
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                sink.error(e);
-                            }
-                        }
+                        new EsActionListener(sink)
                 )
         );
+    }
+
+    private static class EsActionListener implements ActionListener<IndexResponse> {
+        private final MonoSink<IndexResponse> sink;
+
+        public EsActionListener(MonoSink<IndexResponse> sink) {
+            this.sink = sink;
+        }
+
+        @Override
+        public void onResponse(IndexResponse indexResponse) {
+            sink.success(indexResponse);
+        }
+
+        @Override
+        public void onFailure(Exception e) {
+            sink.error(e);
+        }
     }
 }
