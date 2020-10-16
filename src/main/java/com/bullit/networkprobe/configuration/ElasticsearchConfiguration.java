@@ -24,7 +24,7 @@ public class ElasticsearchConfiguration {
         );
     }
 
-    @Bean(name = "elasticSearchExecutor")
+    @Bean(name = "elasticsearchExecutor")
     public Executor elasticSearchExecutor() {
         ThreadFactory threadFactory = new ThreadFactoryBuilder()
                 .setNameFormat("elasticSearchExecutor-%d")

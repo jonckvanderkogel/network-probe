@@ -41,7 +41,7 @@ public class ReactiveStreamsConfiguration {
     @Bean
     public Flow.Subscriber<ConnectionResponse> getElasticsearchSubscriber(
             @Autowired RestHighLevelClient restHighLevelClient,
-            @Autowired @Qualifier("elasticSearchExecutor") Executor executor
+            @Autowired @Qualifier("elasticsearchExecutor") Executor executor
             ) {
         return new ElasticsearchSubscriber(
                 getMdcLogger(),
