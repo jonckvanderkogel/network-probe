@@ -2,16 +2,17 @@ package com.bullit.networkprobe.reactive;
 
 import com.bullit.networkprobe.support.MDCLogger;
 import lombok.extern.slf4j.Slf4j;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import org.slf4j.MDC;
 
-import java.util.concurrent.Flow;
 import java.util.stream.Stream;
 
 import static com.bullit.networkprobe.support.MDCLogger.*;
 
 @Slf4j
-public abstract class BaseSubscriber<T> implements Flow.Subscriber<T> {
-    protected Flow.Subscription subscription;
+public abstract class BaseSubscriber<T> implements Subscriber<T> {
+    protected Subscription subscription;
     private final String subscriberName;
     protected final MDCLogger mdcLogger;
 
@@ -29,7 +30,7 @@ public abstract class BaseSubscriber<T> implements Flow.Subscriber<T> {
     }
 
     @Override
-    public void onSubscribe(Flow.Subscription subscription) {
+    public void onSubscribe(Subscription subscription) {
         this.subscription = subscription;
         subscription.request(1);
     }

@@ -2,32 +2,27 @@ package com.bullit.networkprobe.service;
 
 import com.bullit.networkprobe.domain.ConnectionResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.reactivestreams.Subscriber;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.concurrent.Flow;
-import java.util.concurrent.SubmissionPublisher;
 
 @Slf4j
 @Component
 public class ConnectionScheduler {
     private final ConnectionService testConnectionService;
-    private final SubmissionPublisher<ConnectionResponse> connectionResponsePublisher;
+    private final List<Subscriber<ConnectionResponse>> subscribers;
 
     public ConnectionScheduler(@Autowired ConnectionService connectionService,
-                               @Autowired SubmissionPublisher<ConnectionResponse> connectionResponsePublisher,
-                               @Autowired List<Flow.Subscriber<ConnectionResponse>> subscribers) {
+                               @Autowired List<Subscriber<ConnectionResponse>> subscribers) {
         this.testConnectionService = connectionService;
-        this.connectionResponsePublisher = connectionResponsePublisher;
-        subscribers.stream().forEach(connectionResponsePublisher::subscribe);
+        this.subscribers = subscribers;
     }
 
-    @Scheduled(fixedRate = 1000)
+    @PostConstruct
     public void performConnections() {
-        testConnectionService
-                .connectToServers()
-                .thenAccept(connectionResponsePublisher::submit);
+        subscribers.stream().forEach(sub -> testConnectionService.connectToServers().subscribe(sub));
     }
 }

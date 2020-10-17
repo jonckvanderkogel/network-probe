@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.junit.jupiter.api.Test;
+import reactor.adapter.JdkFlowAdapter;
 
 import java.util.List;
 import java.util.concurrent.SubmissionPublisher;
@@ -24,7 +25,8 @@ public class OutageSubscriberTests {
         var listAppender = setupAppender(OutageSubscriber.class);
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), createDateFormatSupplier());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
-        connectionResultPublisher.subscribe(outageSubscriber);
+        JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(outageSubscriber);
+//        connectionResultPublisher.subscribe(outageSubscriber);
         connectionResultPublisher.submit(produceConnectionResponse(true));
         connectionResultPublisher.submit(produceConnectionResponse(false));
         connectionResultPublisher.submit(produceConnectionResponse(true));
@@ -46,7 +48,8 @@ public class OutageSubscriberTests {
         var listAppender = setupAppender(OutageSubscriber.class);
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), createDateFormatSupplier());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
-        connectionResultPublisher.subscribe(outageSubscriber);
+        JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(outageSubscriber);
+//        connectionResultPublisher.subscribe(outageSubscriber);
         connectionResultPublisher.submit(produceConnectionResponse(true));
         connectionResultPublisher.submit(produceConnectionResponse(false));
         connectionResultPublisher.close();

@@ -17,13 +17,12 @@ import java.util.concurrent.ThreadFactory;
 @Configuration
 @ConfigurationProperties(prefix = "connection")
 public class ConnectionServerConfiguration {
-    private static final String URL = "^(?:[\\w-]+\\.)+([a-z]|[A-Z]|[0-9]){2,6}$";
+    private static final String URL = "^https:\\/\\/(?:[\\w-]+\\.)+([a-z]|[A-Z]|[0-9]){2,6}$";
 
     @Pattern(regexp = URL)
     private String serverOne;
     @Pattern(regexp = URL)
     private String serverTwo;
-    private Integer port;
     private Integer timeOutMillis;
 
     @Bean(name="connectionServerOne")
@@ -34,11 +33,6 @@ public class ConnectionServerConfiguration {
     @Bean(name="connectionServerTwo")
     public String getServerTwo() {
         return this.serverTwo;
-    }
-
-    @Bean(name="port")
-    public Integer getPort() {
-        return this.port;
     }
 
     @Bean(name="timeOutMillis")

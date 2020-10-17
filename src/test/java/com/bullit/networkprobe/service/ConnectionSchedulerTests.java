@@ -3,6 +3,8 @@ package com.bullit.networkprobe.service;
 import com.bullit.networkprobe.domain.ConnectionResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.reactivestreams.Subscriber;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -15,19 +17,16 @@ public class ConnectionSchedulerTests {
     @Test
     public void performingConnectionsShouldResultInMessages() {
         var connectionServiceMock = mock(ConnectionService.class);
-        SubmissionPublisher<ConnectionResponse> publisherMock = mock(SubmissionPublisher.class);
-        Flow.Subscriber<ConnectionResponse> outageSubscriberMock = mock(Flow.Subscriber.class);
-        Flow.Subscriber<ConnectionResponse> connectionSubscriberMock = mock(Flow.Subscriber.class);
+        Subscriber<ConnectionResponse> outageSubscriberMock = mock(Subscriber.class);
+        Subscriber<ConnectionResponse> connectionSubscriberMock = mock(Subscriber.class);
+        var publisherFlux = Flux.just(new ConnectionResponse(true, 666, "none"));
 
-        var connectionResponse = new ConnectionResponse(true, 123, "foo");
-        var answer = new CompletableFuture<ConnectionResponse>();
-        answer.complete(connectionResponse);
-        when(connectionServiceMock.connectToServers()).thenReturn(answer);
+        when(connectionServiceMock.connectToServers()).thenReturn(publisherFlux);
 
-        var connectionScheduler = new ConnectionScheduler(connectionServiceMock, publisherMock, List.of(outageSubscriberMock, connectionSubscriberMock));
+        var connectionScheduler = new ConnectionScheduler(connectionServiceMock, List.of(outageSubscriberMock, connectionSubscriberMock));
         connectionScheduler.performConnections();
 
-        verify(publisherMock).submit(ArgumentMatchers.eq(connectionResponse));
-        verify(publisherMock, times(1)).submit(connectionResponse);
+        verify(outageSubscriberMock, times(1)).onSubscribe(any());
+        verify(connectionSubscriberMock, times(1)).onSubscribe(any());
     }
 }

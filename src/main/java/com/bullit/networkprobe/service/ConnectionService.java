@@ -2,83 +2,85 @@ package com.bullit.networkprobe.service;
 
 import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
+import io.netty.channel.ChannelOption;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.HttpClientResponse;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.time.Duration;
 import java.util.Date;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
-import static com.bullit.networkprobe.support.MDCLogger.*;
+import static com.bullit.networkprobe.support.MDCLogger.MDC_KEY;
+import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_SYSTEM;
 
 @Slf4j
 @Service
 public class ConnectionService {
     private final String serverOne;
     private final String serverTwo;
-    private final Integer port;
     private final Integer timeOutMillis;
-    private final Executor connectionExecutor;
-    private final MDCLogger mdcLogger;
 
-    public ConnectionService(@Autowired @Qualifier("connectionExecutor") Executor connectionExecutor,
-                             @Autowired @Qualifier("connectionServerOne") String serverOne,
+    public ConnectionService(@Autowired @Qualifier("connectionServerOne") String serverOne,
                              @Autowired @Qualifier("connectionServerTwo") String serverTwo,
-                             @Autowired @Qualifier("port") Integer port,
                              @Autowired @Qualifier("timeOutMillis") Integer timeOutMillis,
                              @Autowired MDCLogger mdcLogger) {
-        log.info(String.format("Starting up ConnectionService with servers: %s and %s", serverOne, serverTwo));
-        this.connectionExecutor = connectionExecutor;
         this.serverOne = serverOne;
         this.serverTwo = serverTwo;
-        this.port = port;
         this.timeOutMillis = timeOutMillis;
-        this.mdcLogger = mdcLogger;
+
+        mdcLogger.logWithMDCClearing(() -> {
+            MDC.put(MDC_KEY, MDC_VALUE_SYSTEM);
+            log.info(String.format("Starting up ConnectionService with servers: %s and %s", serverOne, serverTwo));
+        });
     }
 
-    public CompletableFuture<ConnectionResponse> connectToServers() {
-        var connectionFuture1 = CompletableFuture.supplyAsync(() -> performConnection(serverOne, port, timeOutMillis), connectionExecutor);
-        var connectionFuture2 = CompletableFuture.supplyAsync(() -> performConnection(serverTwo, port, timeOutMillis), connectionExecutor);
+    private static class Timer {
+        private final Date start = new Date();
 
-        return CompletableFuture
-                .allOf(connectionFuture1, connectionFuture2)
-                .thenApply(ignoredVoid -> connectionFuture1
-                        .join()
-                        .orElseGet(() -> connectionFuture2
-                                .join()
-                                .orElseGet(() -> new ConnectionResponse(false, 666, "none"))
-                        )
-                );
-    }
-
-    private boolean isReachable(String url, Integer port, int timeOutMillis) {
-        try (Socket soc = new Socket()) {
-            soc.connect(new InetSocketAddress(url, port), timeOutMillis);
-        } catch (IOException e) {
-            mdcLogger.logWithMDCClearing(() -> {
-                MDC.put(MDC_KEY, MDC_VALUE_ERRORS);
-                log.error(e.getMessage());
-                Stream.of(e.getStackTrace()).forEach(l -> log.debug(l.toString()));
-            });
-
-            return false;
+        public long getTimeExpired() {
+            return new Date().getTime() - start.getTime();
         }
-        return true;
     }
 
-    private Optional<ConnectionResponse> performConnection(String url, Integer port, Integer timeOutMillis) {
-        Date now = new Date();
-        boolean isReachable = isReachable(url, port,timeOutMillis);
-        long timeToRespond = new Date().getTime() - now.getTime();
+    private Mono<ConnectionResponse> timedConnection(String server, Integer timeOut) {
+        Supplier<Timer> timer = () -> new Timer();
 
-        return isReachable ? Optional.of(new ConnectionResponse(true, timeToRespond, url)) : Optional.empty();
+        return Mono
+                .fromSupplier(timer)
+                .zipWith(connect(server, timeOut))
+                .map(tuple -> new ConnectionResponse(tuple.getT2().status().code() == 200, tuple.getT1().getTimeExpired(), server))
+                .onErrorResume(e -> Mono.just(new ConnectionResponse(false, 666, "none")));
+    }
+
+    private Mono<HttpClientResponse> connect(String server, Integer timeOut) {
+        return HttpClient.create()
+                .tcpConfiguration(tcpClient ->  tcpClient
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
+                )
+                .get()
+                .uri(server)
+                .response();
+    }
+
+    public Flux<ConnectionResponse> connectToServers () {
+        Mono<ConnectionResponse> response1 = timedConnection(serverOne, timeOutMillis);
+        Mono<ConnectionResponse> response2 = timedConnection(serverTwo, timeOutMillis);
+
+        Flux<ConnectionResponse> mergedResponse = response1
+                .mergeWith(response2)
+                .filter(ConnectionResponse::isReachable)
+                .takeUntil(ConnectionResponse::isReachable)
+                .timeout(Duration.ofSeconds(1))
+                .switchIfEmpty(Mono.just(new ConnectionResponse(false, 666, "none")));
+
+        return Flux.interval(Duration.ofSeconds(1))
+                .flatMap(ignored -> mergedResponse);
     }
 }

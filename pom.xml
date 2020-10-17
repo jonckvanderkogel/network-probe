@@ -19,6 +19,7 @@
 		<elasticsearch.version>7.9.2</elasticsearch.version>
 		<guava.version>27.0.1-jre</guava.version>
 		<reactor.version>3.3.10.RELEASE</reactor.version>
+		<reactor.netty.version>0.9.12.RELEASE</reactor.netty.version>
 	</properties>
 
 	<dependencies>
@@ -57,6 +58,11 @@
 			<version>${elasticsearch.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>io.projectreactor.netty</groupId>
+			<artifactId>reactor-netty</artifactId>
+			<version>${reactor.netty.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>ch.qos.logback.contrib</groupId>
 			<artifactId>logback-json-classic</artifactId>
 			<version>0.1.5</version>
@@ -76,6 +82,11 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>net.jodah</groupId>
 			<artifactId>concurrentunit</artifactId>

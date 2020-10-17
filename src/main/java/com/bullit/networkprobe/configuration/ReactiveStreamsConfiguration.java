@@ -5,6 +5,7 @@ import com.bullit.networkprobe.reactive.*;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.reactivestreams.Subscriber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,8 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.Flow;
-import java.util.concurrent.SubmissionPublisher;
 import java.util.function.Supplier;
 
 import static com.bullit.networkprobe.configuration.ElasticsearchConfiguration.INDEX;
@@ -22,22 +21,17 @@ import static com.bullit.networkprobe.configuration.ElasticsearchConfiguration.I
 public class ReactiveStreamsConfiguration {
 
     @Bean
-    public SubmissionPublisher<ConnectionResponse> getConnectionResponsePublisher() {
-        return new ConnectionResponsePublisher();
-    }
-
-    @Bean
-    public Flow.Subscriber<ConnectionResponse> getOutageSubscriber() {
+    public Subscriber<ConnectionResponse> getOutageSubscriber() {
         return new OutageSubscriber(getMdcLogger(), () -> new Date(), getDateFormatSupplier());
     }
 
     @Bean
-    public Flow.Subscriber<ConnectionResponse> getConnectionSubscriber() {
+    public Subscriber<ConnectionResponse> getConnectionSubscriber() {
         return new ConnectionSubscriber(getMdcLogger());
     }
 
     @Bean
-    public Flow.Subscriber<ConnectionResponse> getElasticsearchSubscriber(@Autowired RestHighLevelClient restHighLevelClient) {
+    public Subscriber<ConnectionResponse> getElasticsearchSubscriber(@Autowired RestHighLevelClient restHighLevelClient) {
         return new ElasticsearchSubscriber(
                 getMdcLogger(),
                 new ElasticsearchClientWrapperImpl(restHighLevelClient),

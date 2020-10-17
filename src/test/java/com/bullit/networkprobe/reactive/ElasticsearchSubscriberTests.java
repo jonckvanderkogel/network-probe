@@ -6,6 +6,7 @@ import com.bullit.networkprobe.support.MDCLogger;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Cancellable;
 import org.junit.jupiter.api.Test;
+import reactor.adapter.JdkFlowAdapter;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,7 +30,8 @@ public class ElasticsearchSubscriberTests {
                 createDateFormatSupplier(),
                 (connectionResponse, timestamp) -> mock(IndexRequest.class));
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
-        connectionResultPublisher.subscribe(elasticsearchSubscriber);
+        JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(elasticsearchSubscriber);
+//        connectionResultPublisher.subscribe(elasticsearchSubscriber);
         connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));
         connectionResultPublisher.close();
 
@@ -54,7 +56,8 @@ public class ElasticsearchSubscriberTests {
                 createDateFormatSupplier(),
                 (c, t) -> null);
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
-        connectionResultPublisher.subscribe(elasticsearchSubscriber);
+        JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(elasticsearchSubscriber);
+//        connectionResultPublisher.subscribe(elasticsearchSubscriber);
         connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));
         connectionResultPublisher.close();
 

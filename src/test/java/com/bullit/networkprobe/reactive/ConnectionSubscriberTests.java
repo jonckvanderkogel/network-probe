@@ -4,6 +4,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.bullit.networkprobe.domain.ConnectionResponse;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.junit.jupiter.api.Test;
+import reactor.adapter.JdkFlowAdapter;
 
 import java.util.List;
 import java.util.concurrent.SubmissionPublisher;
@@ -20,7 +21,8 @@ public class ConnectionSubscriberTests {
         var listAppender = setupAppender(ConnectionSubscriber.class);
         var connectionSubscriber = new ConnectionSubscriber(new MDCLogger());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
-        connectionResultPublisher.subscribe(connectionSubscriber);
+        JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(connectionSubscriber);
+//        connectionResultPublisher.subscribe(connectionSubscriber);
         connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));
         connectionResultPublisher.close();
 
