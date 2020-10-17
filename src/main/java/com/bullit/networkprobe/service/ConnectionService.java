@@ -27,6 +27,8 @@ public class ConnectionService {
     private final String serverTwo;
     private final Integer timeOutMillis;
 
+    private final Supplier<ConnectionResponse> defaultConnectionResponse = () -> new ConnectionResponse(false, 666, "none");
+
     public ConnectionService(@Autowired @Qualifier("connectionServerOne") String serverOne,
                              @Autowired @Qualifier("connectionServerTwo") String serverTwo,
                              @Autowired @Qualifier("timeOutMillis") Integer timeOutMillis,
@@ -54,13 +56,13 @@ public class ConnectionService {
      * with the Mono that we get from the connect call.
      */
     private Mono<ConnectionResponse> timedConnection(String server, Integer timeOut) {
-        Supplier<Timer> timer = () -> new Timer();
+        Supplier<Timer> timer = Timer::new;
 
         return Mono
                 .fromSupplier(timer)
                 .zipWith(connect(server, timeOut))
                 .map(tuple -> new ConnectionResponse(tuple.getT2().status().code() == 200, tuple.getT1().getTimeExpired(), server))
-                .onErrorResume(e -> Mono.just(new ConnectionResponse(false, 666, "none")));
+                .onErrorResume(e -> Mono.just(defaultConnectionResponse.get()));
     }
 
     private Mono<HttpClientResponse> connect(String server, Integer timeOut) {
@@ -87,8 +89,8 @@ public class ConnectionService {
                 .filter(ConnectionResponse::isReachable)
                 .takeUntil(ConnectionResponse::isReachable)
                 .timeout(Duration.ofSeconds(1))
-                .onErrorResume(e -> Mono.just(new ConnectionResponse(false, 666, "none")))
-                .switchIfEmpty(Mono.just(new ConnectionResponse(false, 666, "none")));
+                .onErrorResume(e -> Mono.just(defaultConnectionResponse.get()))
+                .switchIfEmpty(Mono.just(defaultConnectionResponse.get()));
 
         return Flux.interval(Duration.ofSeconds(1))
                 .flatMap(ignored -> mergedResponse);
