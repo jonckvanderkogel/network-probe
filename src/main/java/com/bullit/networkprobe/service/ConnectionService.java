@@ -49,6 +49,10 @@ public class ConnectionService {
         }
     }
 
+    /*
+     * In order to get the timing of how long the request takes, we start a new timer and then zip the result of that
+     * with the Mono that we get from the connect call.
+     */
     private Mono<ConnectionResponse> timedConnection(String server, Integer timeOut) {
         Supplier<Timer> timer = () -> new Timer();
 
@@ -69,15 +73,21 @@ public class ConnectionService {
                 .response();
     }
 
+    /*
+     * We want to get the quickest response from the stream. That's why we do the "mergeWith", this combines the
+     * two Mono's and creates a Flux from it where the Flux emits the first value from whichever Mono responds first.
+     * We don't want to be logging both calls but just the one. That's why we filter out any non-reachable calls
+     * and only take 1 element from this Flux. If neither Mono responds within 1 second we timeout and return the
+     * ConnectionResponse from the onErrorResume. If both Mono's complete without returning a reachable result
+     * the switchIfEmpty logic is invoked and we get the ConnectionResponse from that one.
+     */
     public Flux<ConnectionResponse> connectToServers () {
-        Mono<ConnectionResponse> response1 = timedConnection(serverOne, timeOutMillis);
-        Mono<ConnectionResponse> response2 = timedConnection(serverTwo, timeOutMillis);
-
-        Flux<ConnectionResponse> mergedResponse = response1
-                .mergeWith(response2)
+        Flux<ConnectionResponse> mergedResponse = timedConnection(serverOne, timeOutMillis)
+                .mergeWith(timedConnection(serverTwo, timeOutMillis))
                 .filter(ConnectionResponse::isReachable)
                 .takeUntil(ConnectionResponse::isReachable)
                 .timeout(Duration.ofSeconds(1))
+                .onErrorResume(e -> Mono.just(new ConnectionResponse(false, 666, "none")))
                 .switchIfEmpty(Mono.just(new ConnectionResponse(false, 666, "none")));
 
         return Flux.interval(Duration.ofSeconds(1))
