@@ -22,7 +22,6 @@ public class ConnectionSubscriberTests {
         var connectionSubscriber = new ConnectionSubscriber(new MDCLogger());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(connectionSubscriber);
-//        connectionResultPublisher.subscribe(connectionSubscriber);
         connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));
         connectionResultPublisher.close();
 

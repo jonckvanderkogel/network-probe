@@ -26,7 +26,6 @@ public class OutageSubscriberTests {
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), createDateFormatSupplier());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(outageSubscriber);
-//        connectionResultPublisher.subscribe(outageSubscriber);
         connectionResultPublisher.submit(produceConnectionResponse(true));
         connectionResultPublisher.submit(produceConnectionResponse(false));
         connectionResultPublisher.submit(produceConnectionResponse(true));
@@ -49,7 +48,6 @@ public class OutageSubscriberTests {
         var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), createDateFormatSupplier());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(outageSubscriber);
-//        connectionResultPublisher.subscribe(outageSubscriber);
         connectionResultPublisher.submit(produceConnectionResponse(true));
         connectionResultPublisher.submit(produceConnectionResponse(false));
         connectionResultPublisher.close();

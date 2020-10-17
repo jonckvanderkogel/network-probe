@@ -3,7 +3,6 @@ package com.bullit.networkprobe.reactive;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
@@ -11,21 +10,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 public class ReactiveTestSupport {
-    public static Executor createTestExecutor() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                .setNameFormat("testExecutor-%d")
-                .setDaemon(false)
-                .build();
-
-        return Executors.newFixedThreadPool(2, threadFactory);
-    }
 
     public static <T> ListAppender<ILoggingEvent> setupAppender(Class<T> loggerTest) {
         Logger testLogger = (Logger) LoggerFactory.getLogger(loggerTest);

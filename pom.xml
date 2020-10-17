@@ -20,6 +20,8 @@
 		<guava.version>27.0.1-jre</guava.version>
 		<reactor.version>3.3.10.RELEASE</reactor.version>
 		<reactor.netty.version>0.9.12.RELEASE</reactor.netty.version>
+		<logback.jackson.version>0.1.5</logback.jackson.version>
+		<jackson.databind.version>2.11.2</jackson.databind.version>
 	</properties>
 
 	<dependencies>
@@ -65,17 +67,17 @@
 		<dependency>
 			<groupId>ch.qos.logback.contrib</groupId>
 			<artifactId>logback-json-classic</artifactId>
-			<version>0.1.5</version>
+			<version>${logback.jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ch.qos.logback.contrib</groupId>
 			<artifactId>logback-jackson</artifactId>
-			<version>0.1.5</version>
+			<version>${logback.jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.11.2</version>
+			<version>${jackson.databind.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -85,12 +87,6 @@
 		<dependency>
 			<groupId>io.projectreactor</groupId>
 			<artifactId>reactor-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.jodah</groupId>
-			<artifactId>concurrentunit</artifactId>
-			<version>0.4.6</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

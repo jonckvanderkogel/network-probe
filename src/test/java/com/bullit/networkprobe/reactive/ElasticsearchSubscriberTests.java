@@ -31,7 +31,6 @@ public class ElasticsearchSubscriberTests {
                 (connectionResponse, timestamp) -> mock(IndexRequest.class));
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(elasticsearchSubscriber);
-//        connectionResultPublisher.subscribe(elasticsearchSubscriber);
         connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));
         connectionResultPublisher.close();
 
@@ -57,7 +56,6 @@ public class ElasticsearchSubscriberTests {
                 (c, t) -> null);
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(elasticsearchSubscriber);
-//        connectionResultPublisher.subscribe(elasticsearchSubscriber);
         connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));
         connectionResultPublisher.close();
 
