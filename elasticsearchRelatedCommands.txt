@@ -23,6 +23,6 @@ curl -X PUT "localhost:9200/network-probe-template?pretty" -H 'Content-Type: app
 '
 
 Timelion:
-.es(q=reachable:true, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Reachable").color(green).abs(),
+.es(q=reachable:true, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Reachable").color(green),
 .es(q=reachable:true, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Trend").trend().color(blue),
-.es(q=reachable:false, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Not reachable").color(red).lines(width=50).min(10)
+.es(q=reachable:false, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Not reachable").color(red).lines(width=100).min(10)
