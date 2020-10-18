@@ -20,6 +20,9 @@ import java.util.function.Supplier;
 import static com.bullit.networkprobe.support.MDCLogger.MDC_KEY;
 import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_SYSTEM;
 
+/*
+TODO: add a shutdown hook that properly shuts down the Flux that is created here when the JVM shuts down
+ */
 @Slf4j
 @Service
 public class ConnectionService {

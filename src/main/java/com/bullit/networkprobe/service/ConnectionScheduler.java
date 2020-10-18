@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Subscriber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -23,6 +24,10 @@ public class ConnectionScheduler {
 
     @PostConstruct
     public void performConnections() {
-        subscribers.stream().forEach(sub -> testConnectionService.connectToServers().subscribe(sub));
+        Flux<ConnectionResponse> connectionResponseFlux = testConnectionService.connectToServers();
+
+        subscribers
+                .stream()
+                .forEach(sub -> connectionResponseFlux.subscribe(sub));
     }
 }
