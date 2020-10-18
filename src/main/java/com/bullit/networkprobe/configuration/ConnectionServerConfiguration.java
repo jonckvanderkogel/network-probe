@@ -1,16 +1,15 @@
 package com.bullit.networkprobe.configuration;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.bullit.networkprobe.service.ConnectionService;
+import com.bullit.networkprobe.support.MDCLogger;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Pattern;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 @Validated
 @Setter
@@ -25,28 +24,8 @@ public class ConnectionServerConfiguration {
     private String serverTwo;
     private Integer timeOutMillis;
 
-    @Bean(name="connectionServerOne")
-    public String getServerOne() {
-        return this.serverOne;
-    }
-
-    @Bean(name="connectionServerTwo")
-    public String getServerTwo() {
-        return this.serverTwo;
-    }
-
-    @Bean(name="timeOutMillis")
-    public Integer getTimeOutMillis() {
-        return this.timeOutMillis;
-    }
-
-    @Bean(name= "connectionExecutor")
-    public Executor getConnectionExecutor() {
-        ThreadFactory threadFactory = new ThreadFactoryBuilder()
-                .setNameFormat("connectionExecutor-%d")
-                .setDaemon(false)
-                .build();
-
-        return Executors.newFixedThreadPool(10, threadFactory);
+    @Bean
+    public ConnectionService getConnectionService(@Autowired MDCLogger mdcLogger) {
+        return new ConnectionService(serverOne, serverTwo, timeOutMillis, mdcLogger);
     }
 }

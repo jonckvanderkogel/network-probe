@@ -5,9 +5,6 @@ import com.bullit.networkprobe.support.MDCLogger;
 import io.netty.channel.ChannelOption;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
@@ -20,11 +17,7 @@ import java.util.function.Supplier;
 import static com.bullit.networkprobe.support.MDCLogger.MDC_KEY;
 import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_SYSTEM;
 
-/*
-TODO: add a shutdown hook that properly shuts down the Flux that is created here when the JVM shuts down
- */
 @Slf4j
-@Service
 public class ConnectionService {
     private final String serverOne;
     private final String serverTwo;
@@ -32,10 +25,10 @@ public class ConnectionService {
 
     private final Supplier<ConnectionResponse> defaultConnectionResponse = () -> new ConnectionResponse(false, 666, "none");
 
-    public ConnectionService(@Autowired @Qualifier("connectionServerOne") String serverOne,
-                             @Autowired @Qualifier("connectionServerTwo") String serverTwo,
-                             @Autowired @Qualifier("timeOutMillis") Integer timeOutMillis,
-                             @Autowired MDCLogger mdcLogger) {
+    public ConnectionService(String serverOne,
+                             String serverTwo,
+                             Integer timeOutMillis,
+                             MDCLogger mdcLogger) {
         this.serverOne = serverOne;
         this.serverTwo = serverTwo;
         this.timeOutMillis = timeOutMillis;
@@ -96,6 +89,7 @@ public class ConnectionService {
                 .switchIfEmpty(Mono.just(defaultConnectionResponse.get()));
 
         return Flux.interval(Duration.ofSeconds(1))
-                .flatMap(ignored -> mergedResponse);
+                .flatMap(ignored -> mergedResponse)
+                .onBackpressureBuffer(100);
     }
 }
