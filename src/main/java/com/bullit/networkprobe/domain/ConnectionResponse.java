@@ -1,10 +1,12 @@
 package com.bullit.networkprobe.domain;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-@Data
+@ToString
+@EqualsAndHashCode
 @Getter
 @RequiredArgsConstructor
 public class ConnectionResponse {
