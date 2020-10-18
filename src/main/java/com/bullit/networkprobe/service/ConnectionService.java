@@ -66,7 +66,7 @@ public class ConnectionService {
                 .tcpConfiguration(tcpClient ->  tcpClient
                         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
                 )
-                .get()
+                .head()
                 .uri(server)
                 .response();
     }
