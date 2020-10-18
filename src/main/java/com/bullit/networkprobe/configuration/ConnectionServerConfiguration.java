@@ -1,8 +1,11 @@
 package com.bullit.networkprobe.configuration;
 
+import com.bullit.networkprobe.domain.ConnectionResponse;
+import com.bullit.networkprobe.service.ConnectionScheduler;
 import com.bullit.networkprobe.service.ConnectionService;
 import com.bullit.networkprobe.support.MDCLogger;
 import lombok.Setter;
+import org.reactivestreams.Subscriber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Pattern;
+import java.util.List;
 
 @Validated
 @Setter
@@ -25,7 +29,8 @@ public class ConnectionServerConfiguration {
     private Integer timeOutMillis;
 
     @Bean
-    public ConnectionService getConnectionService(@Autowired MDCLogger mdcLogger) {
-        return new ConnectionService(serverOne, serverTwo, timeOutMillis, mdcLogger);
+    public ConnectionScheduler getConnectionScheduler(@Autowired List<Subscriber<ConnectionResponse>> subscribers,
+                                                      @Autowired MDCLogger mdcLogger) {
+        return new ConnectionScheduler(new ConnectionService(serverOne, serverTwo, timeOutMillis, mdcLogger), subscribers);
     }
 }
