@@ -26,3 +26,6 @@ Timelion:
 .es(q=reachable:true, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Reachable").color(green),
 .es(q=reachable:true, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Trend").trend().color(blue),
 .es(q=reachable:false, metric=avg:responseTime, index=network-probe-index, timefield=timestamp).label("Not reachable").color(red).lines(width=100).min(10)
+
+
+nohup long-running-command &
