@@ -6,33 +6,33 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.bullit.networkprobe.support.MDCLogger.*;
+import static com.bullit.networkprobe.support.MDCLogger.MDC_KEY;
+import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_OUTAGES;
 
 @Slf4j
 public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
     private final OutageMarker outageMarker = new OutageMarker();
-    // SimpleDateFormat is not thread safe so make sure to get a new instance every time you use it
-    private final Supplier<SimpleDateFormat> dfSupplier;
-    private final Supplier<LocalDateTime> dateSupplier;
+    private final Supplier<ZonedDateTime> dateSupplier;
+    private final DateTimeFormatter dateTimeFormatter;
 
-    public OutageSubscriber(MDCLogger mdcLogger, Supplier<LocalDateTime> dateSupplier, Supplier<SimpleDateFormat> dateFormatSupplier) {
+
+    public OutageSubscriber(MDCLogger mdcLogger, Supplier<ZonedDateTime> dateSupplier, DateTimeFormatter dateTimeFormatter) {
         super(mdcLogger,"OutageSubscriber");
         this.dateSupplier = dateSupplier;
-        this.dfSupplier = dateFormatSupplier;
+        this.dateTimeFormatter = dateTimeFormatter;
     }
 
     @Override
     public void performOnNext(ConnectionResponse item) {
         outageMarker.handleMessage(item).ifPresent(outage -> mdcLogger.logWithMDCClearing(() -> {
             MDC.put(MDC_KEY, MDC_VALUE_OUTAGES);
-            MDC.put("from", dfSupplier.get().format(outage.getFrom()));
-            MDC.put("to", dfSupplier.get().format(outage.getTo()));
+            MDC.put("from", dateTimeFormatter.format(outage.getFrom()));
+            MDC.put("to", dateTimeFormatter.format(outage.getTo()));
             log.info("Outage");
         }));
     }
@@ -46,10 +46,10 @@ public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
 
     @Getter
     private static class Outage {
-        private final LocalDateTime from;
-        private final LocalDateTime to;
+        private final ZonedDateTime from;
+        private final ZonedDateTime to;
 
-        public Outage(LocalDateTime from, LocalDateTime to) {
+        public Outage(ZonedDateTime from, ZonedDateTime to) {
             this.from = from;
             this.to = to;
         }
@@ -57,7 +57,7 @@ public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
 
     private class OutageMarker {
         private boolean outageGoingOn = false;
-        private LocalDateTime startTime;
+        private ZonedDateTime startTime;
 
         public Optional<Outage> handleMessage(ConnectionResponse item) {
             return switch (item.getReachableState()) {

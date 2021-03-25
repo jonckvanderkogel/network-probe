@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.Calendar;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -22,15 +24,15 @@ public class ReactiveTestSupport {
         return listAppender;
     }
 
-    public static Supplier<LocalDateTime> createFixedDateSupplier() {
-        LocalDateTime date1 = LocalDateTime.of(2020, Calendar.SEPTEMBER, 23, 20, 50, 44);
-        LocalDateTime date2 = LocalDateTime.of(2020, Calendar.SEPTEMBER, 23, 20, 53, 22);
-        final List<LocalDateTime> dates = List.of(date1, date2);
+    public static Supplier<ZonedDateTime> createFixedDateSupplier() {
+        ZonedDateTime date1 = ZonedDateTime.of(LocalDateTime.of(2020, 9, 23, 20, 50, 44), ZoneId.of("UTC+0200"));
+        ZonedDateTime date2 = ZonedDateTime.of(LocalDateTime.of(2020, 9, 23, 20, 53, 22), ZoneId.of("UTC+0200"));
+        final List<ZonedDateTime> dates = List.of(date1, date2);
         final AtomicInteger atomicInteger = new AtomicInteger();
         return () -> dates.get(atomicInteger.getAndAdd(1));
     }
 
-    public static Supplier<SimpleDateFormat> createDateFormatSupplier() {
-        return () -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    public static DateTimeFormatter getDateTimeFormatter() {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     }
 }

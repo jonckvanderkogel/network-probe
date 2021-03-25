@@ -23,18 +23,19 @@ public class ElasticsearchSubscriberTests {
     @Test
     public void whenReceivingMessageShouldSendToElasticsearch() {
         var esClienWrapperMock = mock(ElasticsearchClientWrapper.class);
+
+        when(esClienWrapperMock.indexAsync(any(), any(), any())).thenReturn(mock(Cancellable.class));
+
         var elasticsearchSubscriber = new ElasticsearchSubscriber(
                 new MDCLogger(),
                 esClienWrapperMock,
                 createFixedDateSupplier(),
-                createDateFormatSupplier(),
+                getDateTimeFormatter(),
                 (connectionResponse, timestamp) -> mock(IndexRequest.class));
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(elasticsearchSubscriber);
         connectionResultPublisher.submit(new ConnectionResponse(true, 123, "foo"));
         connectionResultPublisher.close();
-
-        when(esClienWrapperMock.indexAsync(any(), any(), any())).thenReturn(mock(Cancellable.class));
 
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(
                 () -> verify(esClienWrapperMock, times(1)).indexAsync(any(), any(), any())
@@ -52,7 +53,7 @@ public class ElasticsearchSubscriberTests {
                     return null;
                 },
                 createFixedDateSupplier(),
-                createDateFormatSupplier(),
+                getDateTimeFormatter(),
                 (c, t) -> null);
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(elasticsearchSubscriber);

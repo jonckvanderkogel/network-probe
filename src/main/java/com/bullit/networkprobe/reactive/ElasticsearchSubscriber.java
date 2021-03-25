@@ -11,8 +11,8 @@ import org.slf4j.MDC;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -23,8 +23,8 @@ import static com.bullit.networkprobe.support.MDCLogger.MDC_VALUE_MISSED;
 public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> {
     private final ElasticsearchClientWrapper client;
     private final static String SUBSCRIBER_NAME = "ElasticsearchSubscriber";
-    private final Supplier<SimpleDateFormat> dfSupplier;
-    private final Supplier<LocalDateTime> dateSupplier;
+    private final Supplier<ZonedDateTime> dateSupplier;
+    private final DateTimeFormatter dateTimeFormatter;
     private final BiFunction<ConnectionResponse, String, IndexRequest> createIndexRequestFun;
 
     /**
@@ -37,8 +37,7 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
      *               proper mocking of their classes.
      * @param dateSupplier a Supplier function that is used to get Date instances. Externalizing this
      *                     for test purposes.
-     * @param dateFormatSupplier a Supplier function that returns a SimpleDateFormat instance since these
-     *                           are not Thread safe
+     * @param dateTimeFormatter dateTimeFormatter for registering the dates of the outages
      * @param createIndexRequestFun function that takes a ConnectionResponse and a timestamp string and
      *                              produces an IndexRequest from these. We have to make this a function
      *                              for testing purposes since mocking a IndexRequest does not work properly.
@@ -46,12 +45,12 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
      */
     public ElasticsearchSubscriber(MDCLogger mdcLogger,
                                    ElasticsearchClientWrapper client,
-                                   Supplier<LocalDateTime> dateSupplier,
-                                   Supplier<SimpleDateFormat> dateFormatSupplier,
+                                   Supplier<ZonedDateTime> dateSupplier,
+                                   DateTimeFormatter dateTimeFormatter,
                                    BiFunction<ConnectionResponse, String, IndexRequest> createIndexRequestFun) {
         super(mdcLogger, SUBSCRIBER_NAME);
         this.client = client;
-        this.dfSupplier = dateFormatSupplier;
+        this.dateTimeFormatter = dateTimeFormatter;
         this.dateSupplier = dateSupplier;
         this.createIndexRequestFun = createIndexRequestFun;
     }
@@ -76,7 +75,7 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
                 (
                         createIndexRequestFun.apply(
                                 item,
-                                dfSupplier.get().format(dateSupplier.get())
+                                dateTimeFormatter.format(dateSupplier.get())
                         ),
                         RequestOptions.DEFAULT,
                         new EsActionListener(sink)

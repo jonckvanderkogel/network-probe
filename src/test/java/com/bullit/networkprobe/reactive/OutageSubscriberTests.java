@@ -23,7 +23,7 @@ public class OutageSubscriberTests {
     @Test
     public void havingNonReachableConnectionResultsShouldResultInAnOutage() {
         var listAppender = setupAppender(OutageSubscriber.class);
-        var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), createDateFormatSupplier());
+        var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), getDateTimeFormatter());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(outageSubscriber);
         connectionResultPublisher.submit(produceConnectionResponse(true));
@@ -45,7 +45,7 @@ public class OutageSubscriberTests {
     @Test
     public void terminatingPublisherDuringOutageShouldStillResultInAnOutage() {
         var listAppender = setupAppender(OutageSubscriber.class);
-        var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), createDateFormatSupplier());
+        var outageSubscriber = new OutageSubscriber(new MDCLogger(), createFixedDateSupplier(), getDateTimeFormatter());
         var connectionResultPublisher = new SubmissionPublisher<ConnectionResponse>();
         JdkFlowAdapter.flowPublisherToFlux(connectionResultPublisher).subscribe(outageSubscriber);
         connectionResultPublisher.submit(produceConnectionResponse(true));

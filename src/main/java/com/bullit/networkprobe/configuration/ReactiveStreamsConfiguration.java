@@ -13,10 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import static com.bullit.networkprobe.configuration.ElasticsearchConfiguration.INDEX;
 
@@ -25,7 +24,11 @@ public class ReactiveStreamsConfiguration {
 
     @Bean
     public Subscriber<ConnectionResponse> getOutageSubscriber() {
-        return new OutageSubscriber(getMdcLogger(), LocalDateTime::now, getDateFormatSupplier());
+        return new OutageSubscriber(
+                getMdcLogger(),
+                ZonedDateTime::now,
+                getDateTimeFormatter()
+        );
     }
 
     @Bean
@@ -38,8 +41,8 @@ public class ReactiveStreamsConfiguration {
         return new ElasticsearchSubscriber(
                 getMdcLogger(),
                 new ElasticsearchClientWrapperImpl(restHighLevelClient),
-                LocalDateTime::now,
-                getDateFormatSupplier(),
+                ZonedDateTime::now,
+                getDateTimeFormatter(),
                 this::createIndexRequest
         );
     }
@@ -57,8 +60,8 @@ public class ReactiveStreamsConfiguration {
     }
 
     @Bean
-    public Supplier<SimpleDateFormat> getDateFormatSupplier() {
-        return () -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    public DateTimeFormatter getDateTimeFormatter() {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
     }
 
     @Bean
