@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -18,9 +19,9 @@ public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
     private final OutageMarker outageMarker = new OutageMarker();
     // SimpleDateFormat is not thread safe so make sure to get a new instance every time you use it
     private final Supplier<SimpleDateFormat> dfSupplier;
-    private final Supplier<Date> dateSupplier;
+    private final Supplier<LocalDateTime> dateSupplier;
 
-    public OutageSubscriber(MDCLogger mdcLogger, Supplier<Date> dateSupplier, Supplier<SimpleDateFormat> dateFormatSupplier) {
+    public OutageSubscriber(MDCLogger mdcLogger, Supplier<LocalDateTime> dateSupplier, Supplier<SimpleDateFormat> dateFormatSupplier) {
         super(mdcLogger,"OutageSubscriber");
         this.dateSupplier = dateSupplier;
         this.dfSupplier = dateFormatSupplier;
@@ -45,10 +46,10 @@ public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
 
     @Getter
     private static class Outage {
-        private final Date from;
-        private final Date to;
+        private final LocalDateTime from;
+        private final LocalDateTime to;
 
-        public Outage(Date from, Date to) {
+        public Outage(LocalDateTime from, LocalDateTime to) {
             this.from = from;
             this.to = to;
         }
@@ -56,7 +57,7 @@ public class OutageSubscriber extends BaseSubscriber<ConnectionResponse> {
 
     private class OutageMarker {
         private boolean outageGoingOn = false;
-        private Date startTime;
+        private LocalDateTime startTime;
 
         public Optional<Outage> handleMessage(ConnectionResponse item) {
             return switch (item.getReachableState()) {

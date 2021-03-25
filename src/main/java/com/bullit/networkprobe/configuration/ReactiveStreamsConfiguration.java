@@ -1,7 +1,10 @@
 package com.bullit.networkprobe.configuration;
 
 import com.bullit.networkprobe.domain.ConnectionResponse;
-import com.bullit.networkprobe.reactive.*;
+import com.bullit.networkprobe.reactive.ConnectionSubscriber;
+import com.bullit.networkprobe.reactive.ElasticsearchClientWrapperImpl;
+import com.bullit.networkprobe.reactive.ElasticsearchSubscriber;
+import com.bullit.networkprobe.reactive.OutageSubscriber;
 import com.bullit.networkprobe.support.MDCLogger;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -11,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -22,7 +25,7 @@ public class ReactiveStreamsConfiguration {
 
     @Bean
     public Subscriber<ConnectionResponse> getOutageSubscriber() {
-        return new OutageSubscriber(getMdcLogger(), () -> new Date(), getDateFormatSupplier());
+        return new OutageSubscriber(getMdcLogger(), LocalDateTime::now, getDateFormatSupplier());
     }
 
     @Bean
@@ -35,7 +38,7 @@ public class ReactiveStreamsConfiguration {
         return new ElasticsearchSubscriber(
                 getMdcLogger(),
                 new ElasticsearchClientWrapperImpl(restHighLevelClient),
-                () -> new Date(),
+                LocalDateTime::now,
                 getDateFormatSupplier(),
                 this::createIndexRequest
         );

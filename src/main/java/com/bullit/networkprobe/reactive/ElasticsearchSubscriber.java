@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -24,7 +24,7 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
     private final ElasticsearchClientWrapper client;
     private final static String SUBSCRIBER_NAME = "ElasticsearchSubscriber";
     private final Supplier<SimpleDateFormat> dfSupplier;
-    private final Supplier<Date> dateSupplier;
+    private final Supplier<LocalDateTime> dateSupplier;
     private final BiFunction<ConnectionResponse, String, IndexRequest> createIndexRequestFun;
 
     /**
@@ -46,7 +46,7 @@ public class ElasticsearchSubscriber extends BaseSubscriber<ConnectionResponse> 
      */
     public ElasticsearchSubscriber(MDCLogger mdcLogger,
                                    ElasticsearchClientWrapper client,
-                                   Supplier<Date> dateSupplier,
+                                   Supplier<LocalDateTime> dateSupplier,
                                    Supplier<SimpleDateFormat> dateFormatSupplier,
                                    BiFunction<ConnectionResponse, String, IndexRequest> createIndexRequestFun) {
         super(mdcLogger, SUBSCRIBER_NAME);
