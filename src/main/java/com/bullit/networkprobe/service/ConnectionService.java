@@ -55,20 +55,18 @@ public class ConnectionService {
         Supplier<Timer> timer = Timer::new;
 
         return Mono
-                .fromSupplier(timer)
-                .zipWith(connect(server, timeOut))
-                .map(tuple -> new ConnectionResponse(tuple.getT2().status().code() == 200, tuple.getT1().getTimeExpired(), server))
-                .onErrorResume(e -> Mono.just(defaultConnectionResponse.get()));
+            .fromSupplier(timer)
+            .zipWith(connect(server, timeOut))
+            .map(tuple -> new ConnectionResponse(tuple.getT2().status().code() == 200, tuple.getT1().getTimeExpired(), server))
+            .onErrorResume(e -> Mono.just(defaultConnectionResponse.get()));
     }
 
     private Mono<HttpClientResponse> connect(String server, Integer timeOut) {
         return HttpClient.create()
-                .tcpConfiguration(tcpClient ->  tcpClient
-                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
-                )
-                .head()
-                .uri(server)
-                .response();
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeOut)
+            .head()
+            .uri(server)
+            .response();
     }
 
     /*
@@ -79,17 +77,17 @@ public class ConnectionService {
      * ConnectionResponse from the onErrorResume. If both Mono's complete without returning a reachable result
      * the switchIfEmpty logic is invoked and we get the ConnectionResponse from that one.
      */
-    public Flux<ConnectionResponse> connectToServers () {
+    public Flux<ConnectionResponse> connectToServers() {
         Flux<ConnectionResponse> mergedResponse = timedConnection(serverOne, timeOutMillis)
-                .mergeWith(timedConnection(serverTwo, timeOutMillis))
-                .filter(ConnectionResponse::isReachable)
-                .takeUntil(ConnectionResponse::isReachable)
-                .timeout(Duration.ofSeconds(1))
-                .onErrorResume(e -> Mono.just(defaultConnectionResponse.get()))
-                .switchIfEmpty(Mono.just(defaultConnectionResponse.get()));
+            .mergeWith(timedConnection(serverTwo, timeOutMillis))
+            .filter(ConnectionResponse::isReachable)
+            .takeUntil(ConnectionResponse::isReachable)
+            .timeout(Duration.ofSeconds(1))
+            .onErrorResume(e -> Mono.just(defaultConnectionResponse.get()))
+            .switchIfEmpty(Mono.just(defaultConnectionResponse.get()));
 
         return Flux.interval(Duration.ofSeconds(1))
-                .flatMap(ignored -> mergedResponse)
-                .onBackpressureBuffer(100);
+            .flatMap(ignored -> mergedResponse)
+            .onBackpressureBuffer(100);
     }
 }

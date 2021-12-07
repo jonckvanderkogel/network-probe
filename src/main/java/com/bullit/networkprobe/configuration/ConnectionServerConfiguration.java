@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
+import reactor.core.publisher.Flux;
 
 import javax.validation.constraints.Pattern;
 import java.util.List;
@@ -29,8 +30,13 @@ public class ConnectionServerConfiguration {
     private Integer timeOutMillis;
 
     @Bean
-    public ConnectionScheduler getConnectionScheduler(@Autowired List<Subscriber<ConnectionResponse>> subscribers,
-                                                      @Autowired MDCLogger mdcLogger) {
-        return new ConnectionScheduler(new ConnectionService(serverOne, serverTwo, timeOutMillis, mdcLogger), subscribers);
+    public ConnectionScheduler getConnectionScheduler(@Autowired Flux<ConnectionResponse> connectionResponseFlux,
+                                                      @Autowired List<Subscriber<ConnectionResponse>> subscribers) {
+        return new ConnectionScheduler(connectionResponseFlux, subscribers);
+    }
+
+    @Bean
+    public Flux<ConnectionResponse> connectionResponseFlux(@Autowired MDCLogger mdcLogger) {
+        return new ConnectionService(serverOne, serverTwo, timeOutMillis, mdcLogger).connectToServers().share();
     }
 }
